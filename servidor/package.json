@@ -8,7 +8,9 @@
     "build": "tsc",
     "start": "node dist/server.ts",
     "seed": "ts-node src/scripts/seed.ts",
-    "verify": "ts-node src/scripts/verificar.ts"
+    "verify": "ts-node src/scripts/verificar.ts",
+    "seed-encuestas": "ts-node src/scripts/seedEncuestas.ts",
+    "verify-encuestas": "ts-node src/scripts/verifyEncuestas.ts"
   },
   "keywords": [],
   "author": "",
