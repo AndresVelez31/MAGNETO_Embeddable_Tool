@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { Encuesta } from '../models/Encuesta';
+import { Respuesta } from '../models/Respuesta';
 import { Types } from 'mongoose';
 
 const router = Router();
@@ -11,6 +12,28 @@ router.get('/', async (req: Request, res: Response) => {
     res.json(encuestas);
   } catch (error) {
     res.status(500).json({ mensaje: 'Error al obtener las encuestas', error });
+  }
+});
+
+// Obtener encuestas por tipo
+router.get('/tipo/:tipoEncuesta', async (req: Request, res: Response) => {
+  try {
+    const { tipoEncuesta } = req.params;
+    
+    // Buscar encuestas activas del tipo solicitado
+    const encuestas = await Encuesta.find({ 
+      tipoEncuesta: tipoEncuesta, 
+      estado: 'activa' 
+    }).sort({ ultimaModificacion: -1 });
+    
+    if (encuestas.length === 0) {
+      return res.status(404).json({ mensaje: `No se encontraron encuestas activas del tipo: ${tipoEncuesta}` });
+    }
+    
+    // Retornar la primera encuesta activa del tipo
+    res.json(encuestas[0]);
+  } catch (error) {
+    res.status(500).json({ mensaje: 'Error al obtener la encuesta por tipo', error });
   }
 });
 
@@ -159,6 +182,73 @@ router.delete('/:id', async (req: Request, res: Response) => {
     res.json({ mensaje: 'Encuesta eliminada correctamente' });
   } catch (error) {
     res.status(500).json({ mensaje: 'Error al eliminar la encuesta', error });
+  }
+});
+
+// Guardar respuestas de una encuesta
+router.post('/:id/respuestas', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { respuestasItem } = req.body;
+    
+    if (!Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ mensaje: 'ID de encuesta inválido' });
+    }
+    
+    if (!respuestasItem || !Array.isArray(respuestasItem)) {
+      return res.status(400).json({ 
+        mensaje: 'Se requiere respuestasItem como array' 
+      });
+    }
+    
+    // Verificar que la encuesta existe
+    const encuesta = await Encuesta.findById(id);
+    if (!encuesta) {
+      return res.status(404).json({ mensaje: 'Encuesta no encontrada' });
+    }
+    
+    // Crear nueva respuesta (usuario anónimo por defecto)
+    const nuevaRespuesta = new Respuesta({
+      idEncuesta: id,
+      idUsuario: '000000000000000000000000', // Usuario anónimo por defecto
+      respuestasItem: respuestasItem
+    });
+    
+    const respuestaGuardada = await nuevaRespuesta.save();
+    res.status(201).json(respuestaGuardada);
+    
+  } catch (error) {
+    res.status(500).json({ mensaje: 'Error al guardar la respuesta', error });
+  }
+});
+
+// Registrar que el usuario no respondió la encuesta
+router.post('/:id/no-respondio', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    
+    if (!Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ mensaje: 'ID de encuesta inválido' });
+    }
+    
+    // Verificar que la encuesta existe
+    const encuesta = await Encuesta.findById(id);
+    if (!encuesta) {
+      return res.status(404).json({ mensaje: 'Encuesta no encontrada' });
+    }
+    
+    // Registrar como "no respondió" con respuestas vacías (usuario anónimo)
+    const respuestaNoRespondio = new Respuesta({
+      idEncuesta: id,
+      idUsuario: '000000000000000000000000', // Usuario anónimo por defecto
+      respuestasItem: [] // Array vacío indica "no respondió"
+    });
+    
+    const respuestaGuardada = await respuestaNoRespondio.save();
+    res.status(201).json({ mensaje: 'Registrado como no respondió', respuesta: respuestaGuardada });
+    
+  } catch (error) {
+    res.status(500).json({ mensaje: 'Error al registrar no respuesta', error });
   }
 });
 

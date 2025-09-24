@@ -16,6 +16,7 @@ class EncuestaService {
     return response.json();
   }
 
+  // MÉTODOS ORIGINALES DEL ADMIN (INTACTOS)
   async obtenerEncuestas(): Promise<Encuesta[]> {
     const response = await fetch(`${API_BASE_URL}/encuestas`);
     return this.handleResponse<Encuesta[]>(response);
@@ -55,13 +56,13 @@ class EncuestaService {
     return this.handleResponse<Encuesta>(response);
   }
 
-  async cambiarEstadoEncuesta(id: string, estado: ActualizarEstadoRequest): Promise<Encuesta> {
+  async cambiarEstadoEncuesta(id: string, datos: ActualizarEstadoRequest): Promise<Encuesta> {
     const response = await fetch(`${API_BASE_URL}/encuestas/${id}/estado`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(estado),
+      body: JSON.stringify(datos),
     });
     return this.handleResponse<Encuesta>(response);
   }
@@ -70,7 +71,35 @@ class EncuestaService {
     const response = await fetch(`${API_BASE_URL}/encuestas/${id}`, {
       method: 'DELETE',
     });
-    await this.handleResponse<{ mensaje: string }>(response);
+    await this.handleResponse<void>(response);
+  }
+
+  // NUEVOS MÉTODOS PARA PORTAL DEL CANDIDATO
+  async obtenerEncuestaPorTipo(tipoEncuesta: string): Promise<Encuesta> {
+    const response = await fetch(`${API_BASE_URL}/encuestas/tipo/${tipoEncuesta}`);
+    return this.handleResponse<Encuesta>(response);
+  }
+
+  async enviarRespuestas(idEncuesta: string, respuestasItem: any[]): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/encuestas/${idEncuesta}/respuestas`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ respuestasItem }),
+    });
+    return this.handleResponse<any>(response);
+  }
+
+  async registrarNoRespuesta(idEncuesta: string): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/encuestas/${idEncuesta}/no-respondio`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({}),
+    });
+    return this.handleResponse<any>(response);
   }
 }
 
