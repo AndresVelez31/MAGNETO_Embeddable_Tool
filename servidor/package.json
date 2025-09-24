@@ -10,7 +10,9 @@
     "seed": "ts-node src/scripts/seed.ts",
     "verify": "ts-node src/scripts/verificar.ts",
     "seed-encuestas": "ts-node src/scripts/seedEncuestas.ts",
-    "verify-encuestas": "ts-node src/scripts/verifyEncuestas.ts"
+    "seed-respuestas": "ts-node src/scripts/seedRespuestas.ts",
+    "verify-encuestas": "ts-node src/scripts/verifyEncuestas.ts",
+    "verify-respuestas": "ts-node src/scripts/verifyRespuestas.ts"
   },
   "keywords": [],
   "author": "",
