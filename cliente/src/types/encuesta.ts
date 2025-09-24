@@ -10,6 +10,7 @@ export interface Pregunta {
   contenido: string;
   tipoPregunta: 'opcion_unica' | 'opcion_multiple' | 'escala' | 'nps' | 'abierta';
   opcionesRespuesta: Opcion[];
+  esObligatoria?: boolean;
 }
 
 export interface Encuesta {
