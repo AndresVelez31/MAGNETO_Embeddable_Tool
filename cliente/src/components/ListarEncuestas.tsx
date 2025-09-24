@@ -8,7 +8,7 @@ interface Props {
   onEditar: (encuesta: Encuesta) => void;
 }
 
-export const ListaEncuestas: React.FC<Props> = ({ 
+export const ListarEncuestas: React.FC<Props> = ({ 
   encuestas, 
   onEliminar, 
   onCambiarEstado, 
@@ -57,8 +57,8 @@ export const ListaEncuestas: React.FC<Props> = ({
   }
 
   return (
-    <div className="lista-encuestas">
-      <div className="lista-header">
+    <div className="listar-encuestas">
+      <div className="listar-header">
         <h2>Encuestas ({encuestas.length})</h2>
       </div>
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Encuesta, Pregunta, CrearEncuestaRequest } from '../types/encuesta';
 import { encuestaService } from '../services/encuestaService';
-import { EditorPreguntas } from './EditarPreguntas';
+import { EditarPreguntas } from './EditarPreguntas';
 
 interface Props {
   encuestaInicial?: Encuesta;
@@ -65,6 +65,7 @@ export const CrearEncuesta: React.FC<Props> = ({
       
       onEncuestaCreada(encuestaResultado);
     } catch (err) {
+      console.error('Error detallado al crear encuesta:', err);
       setError(err instanceof Error ? err.message : 'Error al guardar la encuesta');
     } finally {
       setGuardando(false);
@@ -143,7 +144,7 @@ export const CrearEncuesta: React.FC<Props> = ({
 
         <div className="form-section">
           <h3>Preguntas de la Encuesta</h3>
-          <EditorPreguntas
+          <EditarPreguntas
             preguntas={preguntas}
             onPreguntasChange={setPreguntas}
           />

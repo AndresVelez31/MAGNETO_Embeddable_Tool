@@ -7,7 +7,7 @@ const OpcionSchema = new Schema({
 }, { _id: true });
 
 const PreguntaSchema = new Schema({
-  idPregunta: { type: Schema.Types.ObjectId, default: () => new Types.ObjectId() },
+  idPregunta: { type: String, default: () => new Types.ObjectId().toString() },
   contenido: { type: String, required: true },
   tipoPregunta: { type: String, enum: ['opcion_unica','opcion_multiple','escala','nps','abierta'], required: true },
   opcionesRespuesta: { type: [OpcionSchema], default: [] }

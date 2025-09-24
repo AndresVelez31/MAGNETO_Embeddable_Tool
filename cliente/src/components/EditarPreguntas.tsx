@@ -6,7 +6,7 @@ interface Props {
   onPreguntasChange: (preguntas: Pregunta[]) => void;
 }
 
-export const EditorPreguntas: React.FC<Props> = ({ preguntas, onPreguntasChange }) => {
+export const EditarPreguntas: React.FC<Props> = ({ preguntas, onPreguntasChange }) => {
   const agregarPregunta = () => {
     const nuevaPregunta: Pregunta = {
       idPregunta: Math.random().toString(36).substr(2, 9),
@@ -84,7 +84,7 @@ export const EditorPreguntas: React.FC<Props> = ({ preguntas, onPreguntasChange 
   };
 
   return (
-    <div className="editor-preguntas">
+    <div className="editar-preguntas">
       {preguntas.map((pregunta, indicePregunta) => (
         <div key={pregunta.idPregunta} className="pregunta-item">
           <div className="pregunta-header">

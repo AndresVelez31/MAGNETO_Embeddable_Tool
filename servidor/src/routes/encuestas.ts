@@ -38,20 +38,28 @@ router.get('/:id', async (req: Request, res: Response) => {
 // Crear una nueva encuesta
 router.post('/', async (req: Request, res: Response) => {
   try {
+    console.log('📥 Recibiendo petición POST /encuestas');
+    console.log('📄 Body recibido:', JSON.stringify(req.body, null, 2));
+    
     const { tipoEncuesta, nombreEncuesta, empresaRelacionada, preguntas = [] } = req.body;
     
+    console.log('✅ Campos extraídos:', { tipoEncuesta, nombreEncuesta, empresaRelacionada, cantidadPreguntas: preguntas.length });
+    
     if (!tipoEncuesta || !nombreEncuesta) {
+      console.log('❌ Validación fallida: campos obligatorios faltantes');
       return res.status(400).json({ 
         mensaje: 'Los campos tipoEncuesta y nombreEncuesta son obligatorios' 
       });
     }
     
     // Validar preguntas si existen
+    console.log('🔍 Validando preguntas...');
     const preguntasValidadas = preguntas.map((pregunta: any) => ({
       ...pregunta,
-      idPregunta: pregunta.idPregunta || new Types.ObjectId()
+      idPregunta: pregunta.idPregunta || new Types.ObjectId().toString()
     }));
     
+    console.log('📝 Creando nueva encuesta en base de datos...');
     const nuevaEncuesta = new Encuesta({
       tipoEncuesta,
       nombreEncuesta,
@@ -60,10 +68,13 @@ router.post('/', async (req: Request, res: Response) => {
       estado: 'borrador'
     });
     
+    console.log('💾 Guardando encuesta...');
     const encuestaGuardada = await nuevaEncuesta.save();
+    console.log('✅ Encuesta guardada exitosamente:', encuestaGuardada._id);
     res.status(201).json(encuestaGuardada);
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error al crear la encuesta', error });
+    console.error('❌ Error detallado al crear encuesta:', error);
+    res.status(500).json({ mensaje: 'Error al crear la encuesta', error: error instanceof Error ? error.message : error });
   }
 });
 

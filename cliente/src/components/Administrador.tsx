@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import type { Encuesta } from '../types/encuesta';
 import { encuestaService } from '../services/encuestaService';
 import { CrearEncuesta } from './CrearEncuesta';
-import { ListaEncuestas } from './ListarEncuestas';
+import { ListarEncuestas } from './ListarEncuestas';
 import './Administrador.css';
 
 export const Administrador: React.FC = () => {
@@ -107,7 +107,7 @@ export const Administrador: React.FC = () => {
         ) : null;
       default:
         return (
-          <ListaEncuestas
+          <ListarEncuestas
             encuestas={encuestas}
             onEliminar={manejarEliminarEncuesta}
             onCambiarEstado={manejarCambiarEstado}
