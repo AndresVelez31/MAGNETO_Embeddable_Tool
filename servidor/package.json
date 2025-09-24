@@ -7,7 +7,8 @@
     "dev": "ts-node-dev --respawn src/server.ts",
     "build": "tsc",
     "start": "node dist/server.ts",
-    "seed": "ts-node src/scripts/seed.ts"
+    "seed": "ts-node src/scripts/seed.ts",
+    "verify": "ts-node src/scripts/verificar.ts"
   },
   "keywords": [],
   "author": "",
