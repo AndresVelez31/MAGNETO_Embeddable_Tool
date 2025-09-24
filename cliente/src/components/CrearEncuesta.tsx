@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Encuesta, Pregunta, CrearEncuestaRequest } from '../types/encuesta';
 import { encuestaService } from '../services/encuestaService';
-import { EditorPreguntas } from './EditorPreguntas';
+import { EditorPreguntas } from './EditarPreguntas';
 
 interface Props {
   encuestaInicial?: Encuesta;

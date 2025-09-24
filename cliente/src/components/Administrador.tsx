@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import type { Encuesta } from '../types/encuesta';
 import { encuestaService } from '../services/encuestaService';
 import { CrearEncuesta } from './CrearEncuesta';
-import { ListaEncuestas } from './ListaEncuestas';
+import { ListaEncuestas } from './ListarEncuestas';
 import './Administrador.css';
 
 export const Administrador: React.FC = () => {
