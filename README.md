@@ -11,3 +11,6 @@ Instrucciones típicas:
 # Clona el repositorio
 git clone https://github.com/AndresVelez31/MAGNETO_Embeddable_Tool.git
 cd MAGNETO_Embeddable_Tool
+
+# Instala todas las tecnologías, dependencias y paquetes necesarios
+Asegurate de tener Node.js, MongoDB, y dentro del codigo instalar todos los "Node.js Packages" con el comando "npm install" via terminal.
