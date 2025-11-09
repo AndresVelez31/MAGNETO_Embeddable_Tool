@@ -1,6 +1,20 @@
 {
-  "dependencies": {
-    "@types/cors": "^2.8.19",
-    "cors": "^2.8.5"
+  "name": "magneto-embeddable-tool",
+  "version": "1.0.0",
+  "description": "Sistema de encuestas embebibles",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install && cd servidor && npm install && cd ../cliente && npm install",
+    "dev": "concurrently \"npm run dev:servidor\" \"npm run dev:cliente\"",
+    "dev:servidor": "cd servidor && npm run dev",
+    "dev:cliente": "cd cliente && npm run dev",
+    "build": "cd cliente && npm run build && cd ../servidor && npm run build",
+    "clean": "rm -rf servidor/node_modules servidor/dist cliente/node_modules cliente/dist node_modules"
+  },
+  "keywords": ["encuestas", "embeddable", "react", "node"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
   }
 }
