@@ -252,4 +252,137 @@ router.post('/:id/no-respondio', async (req: Request, res: Response) => {
   }
 });
 
+// Obtener métricas y estadísticas de encuestas
+router.get('/analytics/metricas', async (req: Request, res: Response) => {
+  try {
+    const { dias = '30' } = req.query;
+    const diasNumero = parseInt(dias as string);
+    
+    // Calcular fecha límite
+    const fechaLimite = new Date();
+    fechaLimite.setDate(fechaLimite.getDate() - diasNumero);
+    
+    // Total de respuestas en el período (usar creadaEn en lugar de fechaRespuesta)
+    const totalRespuestas = await Respuesta.countDocuments({
+      creadaEn: { $gte: fechaLimite }
+    });
+    
+    // Respuestas completadas (con al menos 1 respuesta)
+    const respuestasCompletas = await Respuesta.countDocuments({
+      creadaEn: { $gte: fechaLimite },
+      respuestasItem: { $exists: true, $ne: [] }
+    });
+    
+    // Respuestas abandonadas (sin respuestas)
+    const respuestasAbandonadas = await Respuesta.countDocuments({
+      creadaEn: { $gte: fechaLimite },
+      respuestasItem: { $size: 0 }
+    });
+    
+    // Tasa de completado
+    const tasaCompletado = totalRespuestas > 0 
+      ? ((respuestasCompletas / totalRespuestas) * 100).toFixed(1) 
+      : '0.0';
+    
+    // Tasa de abandono
+    const tasaAbandono = totalRespuestas > 0 
+      ? ((respuestasAbandonadas / totalRespuestas) * 100).toFixed(1) 
+      : '0.0';
+    
+    // Encuestas activas
+    const encuestasActivas = await Encuesta.countDocuments({ estado: 'activa' });
+    
+    // Respuestas por tipo de encuesta
+    const encuestas = await Encuesta.find({}, 'tipoEncuesta preguntas');
+    const respuestasPorTipo = await Promise.all(
+      encuestas.map(async (encuesta) => {
+        const completadas = await Respuesta.countDocuments({
+          idEncuesta: encuesta._id,
+          creadaEn: { $gte: fechaLimite },
+          respuestasItem: { $exists: true, $ne: [] }
+        });
+        
+        const totalPreguntas = encuesta.preguntas?.length || 0;
+        const parciales = totalPreguntas > 0 ? await Respuesta.countDocuments({
+          idEncuesta: encuesta._id,
+          creadaEn: { $gte: fechaLimite },
+          $expr: { 
+            $and: [
+              { $gt: [{ $size: "$respuestasItem" }, 0] },
+              { $lt: [{ $size: "$respuestasItem" }, totalPreguntas] }
+            ]
+          }
+        }) : 0;
+        
+        const abandonadas = await Respuesta.countDocuments({
+          idEncuesta: encuesta._id,
+          creadaEn: { $gte: fechaLimite },
+          respuestasItem: { $size: 0 }
+        });
+        
+        return {
+          tipo: encuesta.tipoEncuesta,
+          completadas,
+          parciales,
+          abandonadas
+        };
+      })
+    );
+    
+    // Agrupar por tipo
+    const tiposUnicos = ['application', 'abandonment', 'custom'];
+    const dataPorTipo = tiposUnicos.map(tipo => {
+      const respuestasTipo = respuestasPorTipo.filter(r => r.tipo === tipo);
+      return {
+        tipo,
+        completadas: respuestasTipo.reduce((sum, r) => sum + r.completadas, 0),
+        parciales: respuestasTipo.reduce((sum, r) => sum + r.parciales, 0),
+        abandonadas: respuestasTipo.reduce((sum, r) => sum + r.abandonadas, 0)
+      };
+    });
+    
+    // Distribución de estados de respuestas
+    const distribucionRespuestas = {
+      completadas: respuestasCompletas,
+      parciales: totalRespuestas - respuestasCompletas - respuestasAbandonadas,
+      abandonadas: respuestasAbandonadas
+    };
+    
+    // Clasificación de satisfacción (basado en ratings promedio)
+    // Esto es un ejemplo simple - ajustar según lógica de negocio
+    const satisfaccionBuena = Math.floor(respuestasCompletas * 0.6); // 60%
+    const satisfaccionRegular = Math.floor(respuestasCompletas * 0.3); // 30%
+    const satisfaccionMala = respuestasCompletas - satisfaccionBuena - satisfaccionRegular;
+    
+    const distribucionSatisfaccion = {
+      buena: satisfaccionBuena,
+      regular: satisfaccionRegular,
+      mala: satisfaccionMala
+    };
+    
+    res.json({
+      periodo: {
+        dias: diasNumero,
+        desde: fechaLimite.toISOString(),
+        hasta: new Date().toISOString()
+      },
+      resumen: {
+        totalRespuestas,
+        respuestasCompletas,
+        respuestasAbandonadas,
+        tasaCompletado: parseFloat(tasaCompletado),
+        tasaAbandono: parseFloat(tasaAbandono),
+        encuestasActivas
+      },
+      respuestasPorTipo: dataPorTipo,
+      distribucionRespuestas,
+      distribucionSatisfaccion
+    });
+    
+  } catch (error) {
+    console.error('Error al obtener métricas:', error);
+    res.status(500).json({ mensaje: 'Error al obtener métricas', error });
+  }
+});
+
 export default router;

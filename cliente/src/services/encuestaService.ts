@@ -101,6 +101,12 @@ class EncuestaService {
     });
     return this.handleResponse<any>(response);
   }
+
+  // MÉTRICAS Y ANALYTICS
+  async obtenerMetricas(dias: number = 30): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/encuestas/analytics/metricas?dias=${dias}`);
+    return this.handleResponse<any>(response);
+  }
 }
 
 export const encuestaService = new EncuestaService();

@@ -1,36 +1,119 @@
-import React, { useState } from 'react';
-import { Administrador } from './components/Administrador';
-import PortalCandidato from './components/PortalCandidato';
-import './App.css';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import { SurveyProvider } from './contexts/SurveyContext';
+import { Toaster } from './components/ui/toaster';
+import { Toaster as Sonner } from './components/ui/sonner';
+import { AuthGuard } from './components/AuthGuard';
 
-const App: React.FC = () => {
-    const [vista, setVista] = useState<'admin' | 'candidato'>('candidato');
+// Pages
+import { Login } from './pages/Login';
+import { AdminHome } from './pages/AdminHome';
+import { UserHome } from './pages/UserHome';
+import { CreateSurvey } from './pages/CreateSurvey';
+import { EditSurvey } from './pages/EditSurvey';
+import { SurveyList } from './pages/SurveyList';
+import { SurveyDetail } from './pages/SurveyDetail';
+import { ThankYou } from './pages/ThankYou';
+import { DynamicSurvey } from './pages/DynamicSurvey';
+import { Metrics } from './pages/Metrics';
 
-    return (
-        <div className="app">
-            {/* Toggle para cambiar entre vistas */}
-            <div className="view-toggle">
-                <div className="toggle-container">
-                    <div className="toggle-buttons">
-                        <button
-                            onClick={() => setVista('candidato')}
-                            className={`toggle-btn ${vista === 'candidato' ? 'active' : ''}`}
-                        >
-                            Portal Candidato
-                        </button>
-                        <button
-                            onClick={() => setVista('admin')}
-                            className={`toggle-btn ${vista === 'admin' ? 'active' : ''}`}
-                        >
-                            Administrador
-                        </button>
-                    </div>
-                </div>
-            </div>
+function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <SurveyProvider>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/survey/:id" element={<DynamicSurvey />} />
+            <Route path="/survey/:id/thank-you" element={<ThankYou />} />
 
-            {vista === 'candidato' ? <PortalCandidato /> : <Administrador />}
-        </div>
-    );
-};
+            {/* Admin Routes */}
+            <Route
+              path="/admin"
+              element={
+                <AuthGuard requireRole="admin">
+                  <AdminHome />
+                </AuthGuard>
+              }
+            />
+            <Route
+              path="/admin/create-survey"
+              element={
+                <AuthGuard requireRole="admin">
+                  <CreateSurvey />
+                </AuthGuard>
+              }
+            />
+            <Route
+              path="/admin/surveys"
+              element={
+                <AuthGuard requireRole="admin">
+                  <SurveyList />
+                </AuthGuard>
+              }
+            />
+            <Route
+              path="/admin/surveys/:id"
+              element={
+                <AuthGuard requireRole="admin">
+                  <SurveyDetail />
+                </AuthGuard>
+              }
+            />
+            <Route
+              path="/admin/edit/:id"
+              element={
+                <AuthGuard requireRole="admin">
+                  <EditSurvey />
+                </AuthGuard>
+              }
+            />
+            <Route
+              path="/admin/metrics"
+              element={
+                <AuthGuard requireRole="admin">
+                  <Metrics />
+                </AuthGuard>
+              }
+            />
+
+            {/* User Routes */}
+            <Route
+              path="/user"
+              element={
+                <AuthGuard requireRole="user">
+                  <UserHome />
+                </AuthGuard>
+              }
+            />
+            <Route
+              path="/user/survey"
+              element={
+                <AuthGuard requireRole="user">
+                  <DynamicSurvey />
+                </AuthGuard>
+              }
+            />
+            <Route
+              path="/user/thank-you"
+              element={
+                <AuthGuard requireRole="user">
+                  <ThankYou />
+                </AuthGuard>
+              }
+            />
+
+            {/* Default Route */}
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
+          <Toaster />
+          <Sonner />
+        </SurveyProvider>
+      </AuthProvider>
+    </BrowserRouter>
+  );
+}
 
 export default App;

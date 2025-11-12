@@ -1,0 +1,13 @@
+# Robots.txt for Magneto Embeddable Tool
+
+User-agent: *
+Allow: /
+Allow: /survey/*
+Disallow: /admin/*
+Disallow: /api/*
+
+# Crawl-delay for respectful indexing
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://magneto-tool.com/sitemap.xml

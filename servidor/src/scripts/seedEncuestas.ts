@@ -61,7 +61,7 @@ const encuestasPrueba = [
     ]
   },
   {
-    tipoEncuesta: "postulacion",
+    tipoEncuesta: "application",
     empresaRelacionada: "MAGNETO Recursos Humanos",
     estado: "activa",
     nombreEncuesta: "Encuesta de Postulación a Empleo",
@@ -114,7 +114,7 @@ const encuestasPrueba = [
     ]
   },
   {
-    tipoEncuesta: "abandono",
+    tipoEncuesta: "abandonment",
     empresaRelacionada: "MAGNETO Retención",
     estado: "activa",
     nombreEncuesta: "Encuesta de Abandono de Servicio",
