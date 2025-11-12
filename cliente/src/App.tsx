@@ -1,36 +1,17 @@
-import React, { useState } from 'react';
-import { Administrador } from './components/Administrador';
-import PortalCandidato from './components/PortalCandidato';
-import './App.css';
+/**
+ * Main App Component
+ * Componente raíz de la aplicación
+ */
 
-const App: React.FC = () => {
-    const [vista, setVista] = useState<'admin' | 'candidato'>('candidato');
+import { AppProviders } from './core/providers/AppProviders';
+import { AppRouter } from './core/router/AppRouter';
 
-    return (
-        <div className="app">
-            {/* Toggle para cambiar entre vistas */}
-            <div className="view-toggle">
-                <div className="toggle-container">
-                    <div className="toggle-buttons">
-                        <button
-                            onClick={() => setVista('candidato')}
-                            className={`toggle-btn ${vista === 'candidato' ? 'active' : ''}`}
-                        >
-                            Portal Candidato
-                        </button>
-                        <button
-                            onClick={() => setVista('admin')}
-                            className={`toggle-btn ${vista === 'admin' ? 'active' : ''}`}
-                        >
-                            Administrador
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            {vista === 'candidato' ? <PortalCandidato /> : <Administrador />}
-        </div>
-    );
-};
+function App() {
+  return (
+    <AppProviders>
+      <AppRouter />
+    </AppProviders>
+  );
+}
 
 export default App;

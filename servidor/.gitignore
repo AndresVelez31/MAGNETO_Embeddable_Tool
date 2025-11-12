@@ -1,0 +1,41 @@
+# Dependencias
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build
+dist/
+build/
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Logs
+logs/
+*.log
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Temporales
+*.tmp
+*.temp
+.cache/organizacion
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+organizacion
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swoorganizacion
+*~

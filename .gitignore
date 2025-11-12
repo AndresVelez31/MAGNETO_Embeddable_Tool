@@ -1,0 +1,36 @@
+# Dependencias globales
+node_modules
+# **/package-lock.json - Comentado para mantener versiones fijas
+
+# Build
+**/dist/
+**/build/
+
+# Environment
+**/.env
+**/.env.local
+**/.env.*.local
+
+# Logs
+**/*.log
+**/logs/
+
+# Coverage
+**/coverage/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# Archivos temporales
+**/.cache/
+*.tmp
+*.temp
