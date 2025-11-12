@@ -1,5 +1,5 @@
-import connectDB from '../config/database';
-import { Encuesta } from '../models/Encuesta';
+import connectDB from '../../config/database';
+import { Encuesta } from '../../infrastructure/database/models/Encuesta';
 import { Types } from 'mongoose';
 
 // Encuestas de prueba con diferentes tipos de preguntas

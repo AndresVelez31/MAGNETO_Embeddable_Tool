@@ -1,5 +1,5 @@
-import connectDB from '../config/database';
-import { Usuario } from '../models/Usuario';
+import connectDB from '../../config/database';
+import { Usuario } from '../../infrastructure/database/models/Usuario';
 
 const verificarUsuarios = async (): Promise<void> => {
   try {

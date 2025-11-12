@@ -6,13 +6,15 @@
   "scripts": {
     "dev": "ts-node-dev --respawn src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.ts",
+    "start": "node dist/server.js",
     "seed": "ts-node src/scripts/seed.ts",
     "verify": "ts-node src/scripts/verificar.ts",
-    "seed-encuestas": "ts-node src/scripts/seedEncuestas.ts",
-    "seed-respuestas": "ts-node src/scripts/seedRespuestas.ts",
-    "verify-encuestas": "ts-node src/scripts/verificarEncuestas.ts",
-    "verify-respuestas": "ts-node src/scripts/verificarRespuestas.ts"
+    "seed:encuestas": "ts-node src/scripts/seeds/seedEncuestas.ts",
+    "seed:usuarios": "ts-node src/scripts/seeds/seedUsuarios.ts",
+    "seed:respuestas": "ts-node src/scripts/seeds/seedRespuestas.ts",
+    "verify:encuestas": "ts-node src/scripts/verify/verificarEncuestas.ts",
+    "verify:usuarios": "ts-node src/scripts/verify/verificarUsuarios.ts",
+    "verify:respuestas": "ts-node src/scripts/verify/verificarRespuestas.ts"
   },
   "keywords": [],
   "author": "",

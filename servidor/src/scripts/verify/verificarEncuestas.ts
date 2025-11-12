@@ -1,5 +1,5 @@
-import connectDB from '../config/database';
-import { Encuesta } from '../models/Encuesta';
+import connectDB from '../../config/database';
+import { Encuesta } from '../../infrastructure/database/models/Encuesta';
 
 const verificarEncuestas = async (): Promise<void> => {
   try {

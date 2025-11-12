@@ -1,7 +1,7 @@
-import connectDB from '../config/database';
-import { Respuesta } from '../models/Respuesta';
-import { Encuesta } from '../models/Encuesta';
-import { Usuario } from '../models/Usuario';
+import connectDB from '../../config/database';
+import { Respuesta } from '../../infrastructure/database/models/Respuesta';
+import { Encuesta } from '../../infrastructure/database/models/Encuesta';
+import { Usuario } from '../../infrastructure/database/models/Usuario';
 import { Types } from 'mongoose';
 
 const generarRespuestasRealisticas = (pregunta: any) => {
