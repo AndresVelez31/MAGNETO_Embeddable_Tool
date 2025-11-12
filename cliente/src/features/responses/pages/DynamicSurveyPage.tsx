@@ -25,7 +25,7 @@ export function DynamicSurvey() {
   const { user } = useAuth();
 
   const surveyType = searchParams.get('type') || 'application';
-  const { data: survey, isLoading } = useSurveyByType(surveyType);
+  const { data: survey, isLoading, error } = useSurveyByType(surveyType);
   
   const [answers, setAnswers] = useState<Record<string, string | number | string[]>>({});
   const [submitting, setSubmitting] = useState(false);
