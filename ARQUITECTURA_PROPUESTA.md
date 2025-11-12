@@ -49,49 +49,30 @@ cliente/
 │   │   │   └── constants.ts
 │   │   │
 │   │   ├── providers/          # Providers de contexto global
-│   │   │   ├── AppProviders.tsx
-│   │   │   ├── AuthProvider.tsx
-│   │   │   └── QueryProvider.tsx
+│   │   │   └── AppProviders.tsx
 │   │   │
 │   │   ├── router/             # Configuración de rutas
-│   │   │   ├── AppRouter.tsx
-│   │   │   ├── PrivateRoute.tsx
-│   │   │   └── routes.ts
+│   │   │   └── AppRouter.tsx
 │   │   │
 │   │   └── services/           # Servicios base y utilidades HTTP
-│   │       ├── http-client.ts
-│   │       └── api-error.handler.ts
+│   │       └── http-client.ts
 │   │
 │   ├── features/               # Módulos de funcionalidad por dominio
 │   │   ├── auth/               # Autenticación
-│   │   │   ├── components/
-│   │   │   │   ├── LoginForm.tsx
-│   │   │   │   └── RegisterForm.tsx
 │   │   │   ├── hooks/
-│   │   │   │   └── useAuth.ts
-│   │   │   ├── services/
-│   │   │   │   └── auth.service.ts
+│   │   │   │   └── useAuth.tsx
 │   │   │   ├── types/
 │   │   │   │   └── auth.types.ts
 │   │   │   └── pages/
 │   │   │       └── LoginPage.tsx
 │   │   │
 │   │   ├── surveys/            # Gestión de encuestas (ADMIN)
-│   │   │   ├── components/
-│   │   │   │   ├── SurveyCard.tsx
-│   │   │   │   ├── SurveyForm.tsx
-│   │   │   │   ├── QuestionBuilder.tsx
-│   │   │   │   └── QuestionEditor.tsx
 │   │   │   ├── hooks/
-│   │   │   │   ├── useSurveys.ts
-│   │   │   │   └── useSurveyMutations.ts
+│   │   │   │   └── useSurveys.ts
 │   │   │   ├── services/
-│   │   │   │   ├── survey.service.ts
-│   │   │   │   └── survey.repository.ts
+│   │   │   │   └── survey.service.ts
 │   │   │   ├── types/
 │   │   │   │   └── survey.types.ts
-│   │   │   ├── utils/
-│   │   │   │   └── survey.validators.ts
 │   │   │   └── pages/
 │   │   │       ├── SurveyListPage.tsx
 │   │   │       ├── CreateSurveyPage.tsx
@@ -99,13 +80,8 @@ cliente/
 │   │   │       └── SurveyDetailPage.tsx
 │   │   │
 │   │   ├── responses/          # Responder encuestas (USER)
-│   │   │   ├── components/
-│   │   │   │   ├── QuestionDisplay.tsx
-│   │   │   │   ├── QuestionInput.tsx
-│   │   │   │   ├── SurveyProgress.tsx
-│   │   │   │   └── SurveyModal.tsx
 │   │   │   ├── hooks/
-│   │   │   │   └── useResponseForm.ts
+│   │   │   │   └── useResponse.ts
 │   │   │   ├── services/
 │   │   │   │   └── response.service.ts
 │   │   │   ├── types/
@@ -115,10 +91,6 @@ cliente/
 │   │   │       └── ThankYouPage.tsx
 │   │   │
 │   │   ├── analytics/          # Métricas y análisis
-│   │   │   ├── components/
-│   │   │   │   ├── MetricsCard.tsx
-│   │   │   │   ├── ResponseChart.tsx
-│   │   │   │   └── SatisfactionChart.tsx
 │   │   │   ├── hooks/
 │   │   │   │   └── useMetrics.ts
 │   │   │   ├── services/
@@ -129,52 +101,41 @@ cliente/
 │   │   │       └── MetricsPage.tsx
 │   │   │
 │   │   ├── admin/              # Dashboard administrativo
-│   │   │   ├── components/
-│   │   │   │   ├── AdminHeader.tsx
-│   │   │   │   └── AdminSidebar.tsx
 │   │   │   └── pages/
 │   │   │       └── AdminHomePage.tsx
 │   │   │
 │   │   └── user/               # Portal del candidato
-│   │       ├── components/
-│   │       │   └── UserHeader.tsx
 │   │       └── pages/
 │   │           └── UserHomePage.tsx
 │   │
 │   ├── shared/                 # Recursos compartidos
 │   │   ├── components/         # Componentes reutilizables
-│   │   │   ├── ui/             # Componentes UI base (shadcn)
+│   │   │   ├── ui/             # Componentes UI base (shadcn/ui)
 │   │   │   │   ├── button.tsx
 │   │   │   │   ├── card.tsx
 │   │   │   │   ├── input.tsx
 │   │   │   │   ├── select.tsx
 │   │   │   │   ├── dialog.tsx
-│   │   │   │   └── ...
-│   │   │   ├── layout/
-│   │   │   │   ├── Header.tsx
-│   │   │   │   ├── Footer.tsx
-│   │   │   │   └── Container.tsx
+│   │   │   │   ├── checkbox.tsx
+│   │   │   │   ├── radio-group.tsx
+│   │   │   │   ├── table.tsx
+│   │   │   │   ├── tabs.tsx
+│   │   │   │   ├── chart.tsx
+│   │   │   │   └── ... (23 componentes shadcn/ui)
+│   │   │   │
 │   │   │   └── common/
-│   │   │       ├── Loading.tsx
-│   │   │       ├── ErrorBoundary.tsx
-│   │   │       └── AuthGuard.tsx
+│   │   │       ├── AuthGuard.tsx
+│   │   │       ├── QuestionDisplay.tsx
+│   │   │       └── QuestionInput.tsx
 │   │   │
 │   │   ├── hooks/              # Hooks compartidos
-│   │   │   ├── useToast.ts
-│   │   │   ├── useLocalStorage.ts
-│   │   │   └── useDebounce.ts
-│   │   │
-│   │   ├── types/              # Types compartidos
-│   │   │   ├── common.types.ts
-│   │   │   └── api.types.ts
-│   │   │
-│   │   ├── utils/              # Utilidades compartidas
-│   │   │   ├── cn.ts
-│   │   │   ├── formatters.ts
-│   │   │   └── validators.ts
+│   │   │   └── use-toast.ts
 │   │   │
 │   │   └── lib/                # Librerías y configuraciones
 │   │       └── utils.ts
+│   │
+│   ├── types/                  # Types globales
+│   │   └── styles.d.ts
 │   │
 │   ├── App.tsx                 # Componente raíz simplificado
 │   ├── main.tsx                # Entry point
@@ -195,11 +156,9 @@ cliente/
 servidor/
 ├── src/
 │   ├── config/                 # Configuraciones
-│   │   ├── database.ts
-│   │   ├── env.ts
-│   │   └── constants.ts
+│   │   └── database.ts
 │   │
-│   ├── domain/                 # Capa de dominio (modelos y lógica)
+│   ├── domain/                 # Capa de dominio (lógica de negocio)
 │   │   ├── entities/           # Entidades de dominio
 │   │   │   ├── Encuesta.entity.ts
 │   │   │   ├── Respuesta.entity.ts
@@ -209,61 +168,39 @@ servidor/
 │   │   ├── interfaces/         # Interfaces de repositorios
 │   │   │   ├── IEncuestaRepository.ts
 │   │   │   ├── IRespuestaRepository.ts
-│   │   │   └── IUsuarioRepository.ts
+│   │   │   ├── IUsuarioRepository.ts
+│   │   │   └── IMetricaRepository.ts
 │   │   │
 │   │   └── services/           # Lógica de negocio
 │   │       ├── EncuestaService.ts
 │   │       ├── RespuestaService.ts
-│   │       ├── AnalyticsService.ts
-│   │       └── UsuarioService.ts
+│   │       └── MetricaService.ts
 │   │
 │   ├── infrastructure/         # Capa de infraestructura
 │   │   ├── database/           # Implementaciones de base de datos
 │   │   │   ├── models/         # Modelos Mongoose
-│   │   │   │   ├── Encuesta.model.ts
-│   │   │   │   ├── Respuesta.model.ts
-│   │   │   │   ├── Usuario.model.ts
-│   │   │   │   └── Metrica.model.ts
+│   │   │   │   ├── Encuesta.ts
+│   │   │   │   ├── Respuesta.ts
+│   │   │   │   ├── Usuario.ts
+│   │   │   │   └── Metrica.ts
 │   │   │   │
 │   │   │   └── repositories/   # Implementación de repositorios
 │   │   │       ├── EncuestaRepository.ts
 │   │   │       ├── RespuestaRepository.ts
-│   │   │       └── UsuarioRepository.ts
+│   │   │       ├── UsuarioRepository.ts
+│   │   │       └── MetricaRepository.ts
 │   │   │
 │   │   └── http/               # Capa HTTP
 │   │       ├── controllers/    # Controladores
 │   │       │   ├── EncuestaController.ts
-│   │       │   ├── RespuestaController.ts
-│   │       │   ├── AnalyticsController.ts
-│   │       │   └── UsuarioController.ts
+│   │       │   └── RespuestaController.ts
 │   │       │
 │   │       ├── middlewares/    # Middlewares
-│   │       │   ├── error.middleware.ts
-│   │       │   ├── auth.middleware.ts
-│   │       │   ├── validation.middleware.ts
-│   │       │   └── logger.middleware.ts
-│   │       │
-│   │       ├── validators/     # Validadores de entrada
-│   │       │   ├── encuesta.validator.ts
-│   │       │   ├── respuesta.validator.ts
-│   │       │   └── usuario.validator.ts
+│   │       │   └── errorHandler.ts
 │   │       │
 │   │       └── routes/         # Rutas
-│   │           ├── index.ts
-│   │           ├── encuestas.routes.ts
-│   │           ├── respuestas.routes.ts
-│   │           ├── analytics.routes.ts
-│   │           └── usuarios.routes.ts
-│   │
-│   ├── shared/                 # Utilidades compartidas
-│   │   ├── utils/
-│   │   │   ├── logger.ts
-│   │   │   └── errors.ts
-│   │   ├── types/
-│   │   │   ├── express.d.ts
-│   │   │   └── common.types.ts
-│   │   └── constants/
-│   │       └── messages.ts
+│   │           ├── encuestas.ts
+│   │           └── respuestas.ts
 │   │
 │   ├── scripts/                # Scripts de utilidad
 │   │   ├── seeds/
