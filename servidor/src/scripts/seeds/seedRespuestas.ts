@@ -1,184 +1,212 @@
 import connectDB from '../../config/database';
 import { Respuesta } from '../../infrastructure/database/models/Respuesta';
 import { Encuesta } from '../../infrastructure/database/models/Encuesta';
-import { Usuario } from '../../infrastructure/database/models/Usuario';
 import { Types } from 'mongoose';
 
-const generarRespuestasRealisticas = (pregunta: any) => {
+/**
+ * Genera respuestas realistas según el tipo de pregunta
+ */
+const generarRespuesta = (pregunta: any) => {
   const tipo = pregunta.tipoPregunta;
+  const opciones = pregunta.opcionesRespuesta || [];
   
   switch (tipo) {
-    case 'opcion_unica': {
-      // Seleccionar una opción aleatoria
-      const opciones = pregunta.opcionesRespuesta || [];
-      if (opciones.length > 0) {
-        const opcionSeleccionada = opciones[Math.floor(Math.random() * opciones.length)];
-        return opcionSeleccionada.valor;
-      }
-      return null;
-    }
-      
-    case 'opcion_multiple': {
-      // Seleccionar entre 1-3 opciones aleatorias
-      const opcionesMultiples = pregunta.opcionesRespuesta || [];
-      if (opcionesMultiples.length === 0) return [];
-      const numSelecciones = Math.floor(Math.random() * Math.min(3, opcionesMultiples.length)) + 1;
-      const seleccionadas = [];
-      const opcionesTemp = [...opcionesMultiples];
-      for (let i = 0; i < numSelecciones; i++) {
-        const index = Math.floor(Math.random() * opcionesTemp.length);
-        seleccionadas.push(opcionesTemp.splice(index, 1)[0].valor);
-      }
-      return seleccionadas;
-    }
-      
+    case 'texto':
     case 'abierta': {
-      // Generar texto apropiado según el contexto
-      if (pregunta.contenido.toLowerCase().includes('comentario') || 
-          pregunta.contenido.toLowerCase().includes('sugerencia') ||
-          pregunta.contenido.toLowerCase().includes('mejora')) {
-        const respuestasLargas = [
-          'La experiencia fue muy positiva en general. El personal fue amable y profesional, y el servicio cumplió con mis expectativas. Definitivamente recomendaría este servicio a otros.',
-          'Hubo algunos aspectos que podrían mejorar, especialmente en términos de tiempo de respuesta, pero en general la calidad del servicio fue buena.',
-          'Excelente atención al cliente. Me sentí valorado como usuario y todas mis consultas fueron respondidas de manera clara y oportuna.',
-          'El servicio cumplió con lo prometido, aunque creo que hay oportunidades de mejora en la comunicación y seguimiento.',
-          'Muy satisfecho con el resultado final. El proceso fue eficiente y el equipo demostró gran profesionalismo en todo momento.',
-          'La experiencia superó mis expectativas. La atención fue personalizada y se notó el compromiso por brindar un servicio de calidad.',
-          'Aunque el resultado fue satisfactorio, el proceso tomó más tiempo del esperado. Sugiero mejorar la planificación de tiempos.',
-          'Desarrollé una aplicación web completa usando React y Node.js para gestionar inventarios de una pequeña empresa. Implementé autenticación, base de datos MongoDB y panel administrativo.'
-        ];
-        return respuestasLargas[Math.floor(Math.random() * respuestasLargas.length)];
-      } else {
-        const respuestasCortas = [
-          'Excelente servicio',
-          'Muy satisfecho',
-          'Buena experiencia',
-          'Podría mejorar',
-          'Regular',
-          'Satisfactorio',
-          'Recomendable',
-          'Eficiente',
-          'Profesional',
-          'Amigable'
-        ];
-        return respuestasCortas[Math.floor(Math.random() * respuestasCortas.length)];
-      }
+      const respuestasTexto = [
+        'Excelente proceso, muy profesional y organizado.',
+        'Me gustó la atención recibida durante todo el proceso.',
+        'Buena experiencia en general, aunque podría mejorar la comunicación.',
+        'El proceso fue claro y bien estructurado.',
+        'Muy satisfecho con la rapidez y eficiencia.',
+        'Considero que hay áreas de mejora en los tiempos de respuesta.',
+        'La plataforma es intuitiva y fácil de usar.',
+        'Recomendaría este servicio a otros candidatos.',
+      ];
+      return respuestasTexto[Math.floor(Math.random() * respuestasTexto.length)];
     }
-      
-    case 'escala': {
-      // Generar valor de escala (típicamente 1-5)
-      const opcionesEscala = pregunta.opcionesRespuesta || [];
-      if (opcionesEscala.length > 0) {
-        const opcionSeleccionada = opcionesEscala[Math.floor(Math.random() * opcionesEscala.length)];
-        return opcionSeleccionada.valor;
+    
+    case 'lista':
+    case 'opcion_unica': {
+      if (opciones.length > 0) {
+        const opcion = opciones[Math.floor(Math.random() * opciones.length)];
+        return opcion.texto || opcion.valor || opcion;
       }
-      return Math.floor(Math.random() * 5) + 1;
+      return 'Opción 1';
     }
-      
+    
+    case 'opcionMultiple':
+    case 'opcion_multiple': {
+      if (opciones.length > 0) {
+        const numSeleccionadas = Math.floor(Math.random() * Math.min(3, opciones.length)) + 1;
+        const seleccionadas = [];
+        const opcionesDisponibles = [...opciones];
+        
+        for (let i = 0; i < numSeleccionadas && opcionesDisponibles.length > 0; i++) {
+          const index = Math.floor(Math.random() * opcionesDisponibles.length);
+          const opcion = opcionesDisponibles.splice(index, 1)[0];
+          seleccionadas.push(opcion.texto || opcion.valor || opcion);
+        }
+        return seleccionadas;
+      }
+      return ['Opción 1', 'Opción 2'];
+    }
+    
+    case 'calificacion':
+    case 'escala':
+    case 'rating': {
+      if (opciones.length > 0) {
+        const opcion = opciones[Math.floor(Math.random() * opciones.length)];
+        return opcion.valor || opcion;
+      }
+      return Math.floor(Math.random() * 5) + 1; // 1-5
+    }
+    
     case 'nps': {
-      // Generar valor NPS (0-10)
-      const opcionesNps = pregunta.opcionesRespuesta || [];
-      if (opcionesNps.length > 0) {
-        const opcionSeleccionada = opcionesNps[Math.floor(Math.random() * opcionesNps.length)];
-        return opcionSeleccionada.valor;
+      if (opciones.length > 0) {
+        const opcion = opciones[Math.floor(Math.random() * opciones.length)];
+        return opcion.valor || opcion;
       }
       return Math.floor(Math.random() * 11); // 0-10
     }
-      
+    
     default:
-      return 'Respuesta por defecto';
+      return 'Respuesta de prueba';
   }
 };
 
 const seedRespuestas = async (): Promise<void> => {
   try {
-    console.log('🎯 Iniciando seed de respuestas...');
+    console.log('🎯 Iniciando seed de respuestas...\n');
 
-    // Conectar a la base de datos
     await connectDB();
 
-    // Obtener todas las encuestas activas
-    console.log('📋 Obteniendo encuestas disponibles...');
+    // Obtener encuestas activas
+    console.log('📋 Buscando encuestas activas...');
     const encuestas = await Encuesta.find({ estado: 'activa' });
     
     if (encuestas.length === 0) {
-      console.log('⚠️ No se encontraron encuestas activas. Ejecuta primero el seed de encuestas.');
-      return;
+      console.log('⚠️  No hay encuestas activas.');
+      console.log('💡 Ejecuta: npm run seed:encuestas\n');
+      process.exit(0);
     }
 
-    // Obtener todos los usuarios
-    console.log('👥 Obteniendo usuarios disponibles...');
-    const usuarios = await Usuario.find({});
-    
-    if (usuarios.length === 0) {
-      console.log('⚠️ No se encontraron usuarios. Ejecuta primero el seed de usuarios.');
-      return;
-    }
+    console.log(`✅ Encontradas ${encuestas.length} encuestas activas\n`);
 
-    // Limpiar respuestas existentes (opcional)
-    console.log('🗑️ Limpiando respuestas existentes...');
-    await Respuesta.deleteMany({});
+    // Limpiar respuestas existentes
+    console.log('�️  Limpiando respuestas anteriores...');
+    const deleted = await Respuesta.deleteMany({});
+    console.log(`   Eliminadas: ${deleted.deletedCount} respuestas\n`);
 
-    console.log('✏️ Generando respuestas de prueba...');
-    
-    let totalRespuestas = 0;
+    console.log('✏️  Generando nuevas respuestas...\n');
 
-    // Para cada encuesta, generar respuestas de varios usuarios
+    // IDs de usuarios simulados
+    const usuariosSimulados = [
+      'user_001',
+      'user_002', 
+      'user_003',
+      'user_004',
+      'user_005',
+      'juan.perez@email.com',
+      'maria.garcia@email.com',
+      'carlos.rodriguez@email.com',
+    ];
+
+    let totalCreadas = 0;
+
+    // Para cada encuesta
     for (const encuesta of encuestas) {
-      console.log(`\n📝 Generando respuestas para: "${encuesta.nombreEncuesta}"`);
+      console.log(`📝 Encuesta: "${encuesta.nombreEncuesta}"`);
+      console.log(`   Preguntas: ${encuesta.preguntas.length}`);
       
-      // Cada encuesta tendrá respuestas de 3-7 usuarios aleatorios
-      const numUsuariosQueResponden = Math.floor(Math.random() * 5) + 3;
-      const usuariosAleatorios = usuarios
-        .sort(() => 0.5 - Math.random())
-        .slice(0, numUsuariosQueResponden);
+      // Crear 5-10 respuestas por encuesta
+      const numRespuestas = Math.floor(Math.random() * 6) + 5;
+      
+      for (let i = 0; i < numRespuestas; i++) {
+        // Decidir si es anónima (20% de probabilidad)
+        const esAnonima = Math.random() < 0.2;
+        const idUsuario = esAnonima 
+          ? 'anonymous'
+          : usuariosSimulados[Math.floor(Math.random() * usuariosSimulados.length)];
 
-      for (const usuario of usuariosAleatorios) {
-        const respuestasItem = [];
+        // Generar respuestas para todas las preguntas
+        const respuestasItem = encuesta.preguntas.map((pregunta: any) => ({
+          idPregunta: pregunta.idPregunta,
+          respuesta: generarRespuesta(pregunta),
+        }));
 
-        // Generar respuesta para cada pregunta de la encuesta
-        for (const pregunta of encuesta.preguntas) {
-          const respuestaGenerada = generarRespuestasRealisticas(pregunta);
-          
-          respuestasItem.push({
-            idPregunta: pregunta.idPregunta,
-            respuesta: respuestaGenerada
-          });
-        }
-
-        // Crear la respuesta completa
+        // Crear la respuesta
         const nuevaRespuesta = new Respuesta({
           idEncuesta: encuesta._id,
-          idUsuario: usuario._id,
-          respuestasItem: respuestasItem
+          idUsuario: idUsuario,
+          respuestasItem: respuestasItem,
         });
 
         await nuevaRespuesta.save();
-        totalRespuestas++;
-
-        console.log(`   ✅ Respuesta creada para usuario: ${usuario.nombre}`);
+        totalCreadas++;
+        
+        const tipo = esAnonima ? '👤 Anónima' : `👤 ${idUsuario}`;
+        console.log(`   ✅ ${tipo} (${respuestasItem.length} respuestas)`);
       }
+      
+      // Agregar algunas respuestas "no respondió" (array vacío)
+      const numNoRespondieron = Math.floor(Math.random() * 3) + 1;
+      for (let i = 0; i < numNoRespondieron; i++) {
+        const idUsuario = usuariosSimulados[Math.floor(Math.random() * usuariosSimulados.length)];
+        
+        const respuestaVacia = new Respuesta({
+          idEncuesta: encuesta._id,
+          idUsuario: idUsuario,
+          respuestasItem: [], // No respondió
+        });
+
+        await respuestaVacia.save();
+        totalCreadas++;
+        console.log(`   ⏭️  No respondió: ${idUsuario}`);
+      }
+      
+      console.log('');
     }
 
-    console.log(`\n🎉 Seed completado exitosamente!`);
-    console.log(`📊 Total de respuestas generadas: ${totalRespuestas}`);
+    // Estadísticas finales
+    console.log('━'.repeat(50));
+    console.log('📊 ESTADÍSTICAS FINALES\n');
     
-    // Mostrar estadísticas por encuesta
-    console.log('\n📈 Estadísticas por encuesta:');
+    const total = await Respuesta.countDocuments();
+    const completadas = await Respuesta.countDocuments({ 
+      respuestasItem: { $exists: true, $ne: [] } 
+    });
+    const noRespondieron = await Respuesta.countDocuments({ 
+      respuestasItem: { $exists: true, $eq: [] } 
+    });
+    const anonimas = await Respuesta.countDocuments({ idUsuario: 'anonymous' });
+    
+    console.log(`Total de respuestas:     ${total}`);
+    console.log(`Completadas:             ${completadas}`);
+    console.log(`No respondieron:         ${noRespondieron}`);
+    console.log(`Anónimas:                ${anonimas}`);
+    console.log(`Identificadas:           ${total - anonimas}\n`);
+
+    // Desglose por encuesta
+    console.log('📈 Por encuesta:\n');
     for (const encuesta of encuestas) {
-      const numRespuestas = await Respuesta.countDocuments({ idEncuesta: encuesta._id });
-      console.log(`   - ${encuesta.nombreEncuesta}: ${numRespuestas} respuestas`);
+      const count = await Respuesta.countDocuments({ idEncuesta: encuesta._id });
+      const tipo = encuesta.tipoEncuesta || 'N/A';
+      console.log(`   ${encuesta.nombreEncuesta}`);
+      console.log(`   Tipo: ${tipo} | Respuestas: ${count}\n`);
     }
 
-  } catch (error) {
-    console.error('❌ Error durante el seed de respuestas:', error);
-  } finally {
-    // Cerrar la conexión
+    console.log('━'.repeat(50));
+    console.log('✅ Seed de respuestas completado exitosamente!\n');
+
     process.exit(0);
+  } catch (error) {
+    console.error('❌ Error durante el seed:', error);
+    process.exit(1);
   }
 };
 
-// Ejecutar el seed si el archivo se ejecuta directamente
+// Ejecutar si se llama directamente
 if (require.main === module) {
   seedRespuestas();
 }

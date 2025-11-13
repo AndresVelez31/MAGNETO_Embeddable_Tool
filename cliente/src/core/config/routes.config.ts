@@ -8,6 +8,9 @@ export const ROUTES = {
   // Public
   LOGIN: '/login',
   
+  // Public Survey (para modo embebido)
+  SURVEY: '/survey',
+  
   // Admin
   ADMIN: {
     HOME: '/admin',
@@ -17,6 +20,10 @@ export const ROUTES = {
       DETAIL: (id: string) => `/admin/surveys/${id}`,
       EDIT: (id: string) => `/admin/surveys/${id}/edit`,
     },
+    RESPONSES: {
+      LIST: '/admin/responses',
+      DETAIL: (id: string) => `/admin/responses/${id}`,
+    },
     METRICS: '/admin/metrics',
   },
   
@@ -24,6 +31,5 @@ export const ROUTES = {
   USER: {
     HOME: '/user',
     SURVEY: '/user/survey',
-    THANK_YOU: '/user/thank-you',
   },
 } as const;

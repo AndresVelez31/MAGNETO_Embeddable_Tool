@@ -7,13 +7,15 @@
  * <script src="https://magneto-tool.com/embed.js"></script>
  * <script>
  *   MagnetoSurvey.init({
- *     surveyType: 'application', // 'application', 'abandonment', 'custom'
+ *     surveyType: 'postulacion', // 'postulacion', 'desercion', 'satisfaccion'
  *     trigger: 'button', // 'button', 'auto', 'scroll', 'exit'
  *     buttonText: 'Dar Feedback',
  *     position: 'bottom-right', // 'bottom-right', 'bottom-left', 'top-right', 'top-left'
  *     delay: 3000, // Delay para trigger 'auto' en ms
- *     jobTitle: 'Desarrollador Full Stack', // Opcional
- *     onComplete: function() { console.log('Survey completed!'); }
+ *     jobTitle: 'Desarrollador Full Stack', // Nombre de la vacante
+ *     vacancyName: 'Desarrollador Full Stack', // Alias de jobTitle
+ *     onComplete: function() { console.log('Survey completed!'); },
+ *     onNoResponse: function() { console.log('Survey closed without response'); }
  *   });
  * </script>
  */
@@ -21,7 +23,7 @@
 (function(window, document) {
   'use strict';
 
-  const API_BASE_URL = window.MAGNETO_API_URL || 'https://magneto-tool.com';
+  const API_BASE_URL = window.MAGNETO_API_URL || 'http://localhost:5173';
   
   class MagnetoSurvey {
     constructor() {
@@ -36,12 +38,12 @@
      */
     init(config = {}) {
       this.config = {
-        surveyType: config.surveyType || 'application',
+        surveyType: this.normalizeSurveyType(config.surveyType || 'postulacion'),
         trigger: config.trigger || 'button',
         buttonText: config.buttonText || '📋 Dar Feedback',
         position: config.position || 'bottom-right',
         delay: config.delay || 3000,
-        jobTitle: config.jobTitle || '',
+        jobTitle: config.jobTitle || config.vacancyName || '',
         onComplete: config.onComplete || function() {},
         onNoResponse: config.onNoResponse || function() {}
       };
@@ -62,6 +64,23 @@
           this.setupExitTrigger();
           break;
       }
+    }
+
+    /**
+     * Normaliza el tipo de encuesta a los valores esperados
+     */
+    normalizeSurveyType(type) {
+      const typeMap = {
+        'application': 'postulacion',
+        'postulacion': 'postulacion',
+        'abandonment': 'desercion',
+        'desercion': 'desercion',
+        'abandono': 'desercion',
+        'satisfaction': 'satisfaccion',
+        'satisfaccion': 'satisfaccion',
+        'custom': 'custom'
+      };
+      return typeMap[type.toLowerCase()] || 'postulacion';
     }
 
     /**
@@ -241,13 +260,24 @@
         });
       }
 
+      // Construir URL con parámetros
+      const params = new URLSearchParams({
+        type: this.config.surveyType,
+        embedded: 'true'
+      });
+      
+      if (this.config.jobTitle) {
+        params.append('jobTitle', this.config.jobTitle);
+      }
+
       // Cargar iframe con la encuesta
       const iframe = document.createElement('iframe');
-      iframe.src = `${API_BASE_URL}/survey/${this.config.surveyType}?embedded=true&jobTitle=${encodeURIComponent(this.config.jobTitle)}`;
+      iframe.src = `${API_BASE_URL}/survey?${params.toString()}`;
       iframe.style.width = '100%';
-      iframe.style.height = '80vh';
+      iframe.style.height = '85vh';
       iframe.style.border = 'none';
       iframe.style.borderRadius = '12px';
+      iframe.setAttribute('allow', 'clipboard-write');
       
       const content = this.modalElement.querySelector('#magneto-modal-content');
       content.innerHTML = '';
@@ -258,6 +288,12 @@
 
       // Escuchar mensajes del iframe
       window.addEventListener('message', this.handleMessage.bind(this));
+      
+      // Track apertura
+      this.trackEvent('survey_opened', { 
+        surveyType: this.config.surveyType,
+        jobTitle: this.config.jobTitle 
+      });
     }
 
     /**

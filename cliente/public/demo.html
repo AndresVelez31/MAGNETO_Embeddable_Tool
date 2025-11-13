@@ -179,17 +179,47 @@
     </div>
 
     <div class="content">
+      <h2>📋 Tipos de Encuesta</h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h3>Postulación</h3>
+          <p>Para capturar feedback después de que un candidato aplique a una vacante.</p>
+          <code>surveyType: 'postulacion'</code>
+        </div>
+
+        <div class="feature-card">
+          <h3>Deserción</h3>
+          <p>Para entender por qué un candidato abandona el proceso de selección.</p>
+          <code>surveyType: 'desercion'</code>
+        </div>
+
+        <div class="feature-card">
+          <h3>Satisfacción</h3>
+          <p>Para medir la satisfacción general con el proceso o servicio.</p>
+          <code>surveyType: 'satisfaccion'</code>
+        </div>
+
+        <div class="feature-card">
+          <h3>Personalizada</h3>
+          <p>Para encuestas personalizadas según tus necesidades.</p>
+          <code>surveyType: 'custom'</code>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
       <h2>🎨 Personalización</h2>
       
       <h3>Opciones Disponibles:</h3>
       <div class="code-block">
 {
-  surveyType: 'application',    // 'application', 'abandonment', 'custom'
+  surveyType: 'postulacion',     // 'postulacion', 'desercion', 'satisfaccion', 'custom'
   trigger: 'button',             // 'button', 'auto', 'scroll', 'exit'
   buttonText: 'Tu Texto',        // Texto del botón
   position: 'bottom-right',      // Posición: bottom-right, bottom-left, top-right, top-left
   delay: 3000,                   // Delay en milisegundos (para trigger 'auto')
-  jobTitle: 'Nombre del Puesto', // Opcional
+  jobTitle: 'Nombre del Puesto', // Nombre de la vacante (opcional)
+  vacancyName: 'Otro nombre',    // Alias de jobTitle (opcional)
   onComplete: function() {},     // Callback al completar
   onNoResponse: function() {}    // Callback si cierra sin responder
 }
@@ -201,8 +231,12 @@
       <p>Prueba los diferentes modos de activación:</p>
       
       <div class="demo-buttons">
-        <button class="demo-button" onclick="demoButton()">
-          🔘 Demo Botón Flotante
+        <button class="demo-button" onclick="demoPostulacion()">
+          ✅ Demo Postulación
+        </button>
+        
+        <button class="demo-button" onclick="demoDesercion()">
+          ❌ Demo Deserción
         </button>
         
         <button class="demo-button" onclick="demoAuto()">
@@ -210,11 +244,7 @@
         </button>
         
         <button class="demo-button" onclick="demoScroll()">
-          📜 Demo Scroll
-        </button>
-        
-        <button class="demo-button" onclick="demoExit()">
-          🚪 Demo Exit Intent
+          � Demo Scroll
         </button>
       </div>
     </div>
@@ -256,29 +286,50 @@
       }
     }
 
-    function demoButton() {
+    function demoPostulacion() {
       resetDemo();
       window.MagnetoSurvey.init({
-        surveyType: 'application',
+        surveyType: 'postulacion',
         trigger: 'button',
-        buttonText: '📋 Dar Feedback Demo',
+        buttonText: '✅ Feedback Postulación',
         position: 'bottom-right',
-        jobTitle: 'Desarrollador Full Stack',
+        jobTitle: 'Desarrollador Full Stack Senior',
         onComplete: function() {
-          alert('¡Gracias por completar la encuesta de demostración!');
+          alert('¡Gracias por completar la encuesta de postulación!');
+        },
+        onNoResponse: function() {
+          console.log('Usuario cerró sin responder la encuesta de postulación');
         }
       });
-      currentDemo = 'button';
+      currentDemo = 'postulacion';
+    }
+
+    function demoDesercion() {
+      resetDemo();
+      window.MagnetoSurvey.init({
+        surveyType: 'desercion',
+        trigger: 'button',
+        buttonText: '❌ Feedback Deserción',
+        position: 'bottom-left',
+        jobTitle: 'Diseñador UX/UI',
+        onComplete: function() {
+          alert('Gracias por tu feedback. Lamentamos que hayas decidido abandonar el proceso.');
+        },
+        onNoResponse: function() {
+          console.log('Usuario cerró sin responder la encuesta de deserción');
+        }
+      });
+      currentDemo = 'desercion';
     }
 
     function demoAuto() {
       resetDemo();
       alert('La encuesta se abrirá automáticamente en 3 segundos');
       window.MagnetoSurvey.init({
-        surveyType: 'application',
+        surveyType: 'postulacion',
         trigger: 'auto',
         delay: 3000,
-        jobTitle: 'Demo Auto-Trigger',
+        jobTitle: 'Product Manager',
         onComplete: function() {
           alert('¡Gracias por completar la encuesta!');
         }
@@ -290,26 +341,18 @@
       resetDemo();
       alert('Desplázate hasta el final de la página para activar la encuesta');
       window.MagnetoSurvey.init({
-        surveyType: 'abandonment',
+        surveyType: 'satisfaccion',
         trigger: 'scroll',
-        jobTitle: 'Demo Scroll Trigger'
+        jobTitle: 'Analista de Datos',
+        onComplete: function() {
+          alert('¡Gracias por tu feedback!');
+        }
       });
       currentDemo = 'scroll';
     }
 
-    function demoExit() {
-      resetDemo();
-      alert('Intenta mover el cursor fuera de la ventana (hacia arriba) para activar la encuesta');
-      window.MagnetoSurvey.init({
-        surveyType: 'custom',
-        trigger: 'exit',
-        jobTitle: 'Demo Exit Intent'
-      });
-      currentDemo = 'exit';
-    }
-
     // Inicializar demo por defecto
-    demoButton();
+    demoPostulacion();
   </script>
 </body>
 </html>

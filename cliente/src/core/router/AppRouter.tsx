@@ -21,12 +21,13 @@ const SurveyListPage = lazy(() => import('@/features/surveys/pages/SurveyListPag
 const CreateSurveyPage = lazy(() => import('@/features/surveys/pages/CreateSurveyPage'));
 const EditSurveyPage = lazy(() => import('@/features/surveys/pages/EditSurveyPage'));
 const SurveyDetailPage = lazy(() => import('@/features/surveys/pages/SurveyDetailPage'));
+const ResponseListPage = lazy(() => import('@/features/responses/pages/ResponseListPage'));
+const ResponseDetailPage = lazy(() => import('@/features/responses/pages/ResponseDetailPage'));
 const MetricsPage = lazy(() => import('@/features/analytics/pages/MetricsPage'));
 
 // User
 const UserHomePage = lazy(() => import('@/features/user/pages/UserHomePage'));
 const DynamicSurveyPage = lazy(() => import('@/features/responses/pages/DynamicSurveyPage'));
-const ThankYouPage = lazy(() => import('@/features/responses/pages/ThankYouPage'));
 
 // Loading component
 function LoadingFallback() {
@@ -64,6 +65,9 @@ export function AppRouter() {
 
         {/* Auth */}
         <Route path={ROUTES.LOGIN} element={<LoginPage />} />
+
+        {/* Public Survey (para modo embebido sin autenticación) */}
+        <Route path={ROUTES.SURVEY} element={<DynamicSurveyPage />} />
 
         {/* Admin Routes */}
         <Route
@@ -114,6 +118,22 @@ export function AppRouter() {
             </AuthGuard>
           }
         />
+        <Route
+          path={ROUTES.ADMIN.RESPONSES.LIST}
+          element={
+            <AuthGuard requireRole="admin">
+              <ResponseListPage />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path={`${ROUTES.ADMIN.RESPONSES.LIST}/:id`}
+          element={
+            <AuthGuard requireRole="admin">
+              <ResponseDetailPage />
+            </AuthGuard>
+          }
+        />
 
         {/* User Routes */}
         <Route
@@ -129,14 +149,6 @@ export function AppRouter() {
           element={
             <AuthGuard requireRole="user">
               <DynamicSurveyPage />
-            </AuthGuard>
-          }
-        />
-        <Route
-          path={ROUTES.USER.THANK_YOU}
-          element={
-            <AuthGuard requireRole="user">
-              <ThankYouPage />
             </AuthGuard>
           }
         />

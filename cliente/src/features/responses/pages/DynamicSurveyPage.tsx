@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useSurveyByType } from '@/features/surveys/hooks/useSurveys';
-import { responseService } from '../services/response.service';
+import { useSubmitResponse, useRegisterNoResponse } from '../hooks/useResponses';
 import type { Question } from '@/features/surveys/types/survey.types';
 import { Button } from '@/shared/components/ui/button';
 import { Card } from '@/shared/components/ui/card';
@@ -15,28 +15,46 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/shared/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/shared/components/ui/alert-dialog';
 import { toast } from 'sonner';
-import { ArrowLeft, Loader2, X } from 'lucide-react';
+import { ArrowLeft, Loader2, X, CheckCircle2, AlertCircle } from 'lucide-react';
 import { ROUTES } from '@/core/config/routes.config';
 
 export function DynamicSurvey() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  
+  // Hooks para mutations
+  const submitResponseMutation = useSubmitResponse();
+  const registerNoResponseMutation = useRegisterNoResponse();
 
-  const surveyType = searchParams.get('type') || 'application';
-  const { data: survey, isLoading, error } = useSurveyByType(surveyType);
+  const surveyType = searchParams.get('type') || 'postulacion';
+  const jobTitle = searchParams.get('jobTitle') || searchParams.get('vacancyName') || '';
+  const embedded = searchParams.get('embedded') === 'true';
+  
+  const { data: survey, isLoading } = useSurveyByType(surveyType);
   
   const [answers, setAnswers] = useState<Record<string, string | number | string[]>>({});
   const [submitting, setSubmitting] = useState(false);
-  const [showDialog, setShowDialog] = useState(false);
+  const [showWelcomeDialog, setShowWelcomeDialog] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [showErrorDialog, setShowErrorDialog] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
 
   useEffect(() => {
-    if (survey) {
-      setShowDialog(true);
+    if (survey && !embedded) {
+      setShowWelcomeDialog(true);
     }
-  }, [survey]);
+  }, [survey, embedded]);
 
   // Calculate progress
   const totalQuestions = survey?.preguntas.length || 0;
@@ -93,27 +111,30 @@ export function DynamicSurvey() {
         estado
       });
 
-      await responseService.submitSurveyResponse(
-        survey._id || survey.id!,
-        user?.id || 'anonymous',
+      await submitResponseMutation.mutateAsync({
+        surveyId: survey._id || survey.id!,
+        userId: user?.id || 'anonymous',
         answers,
         isAnonymous,
         estado
-      );
+      });
 
       console.log('✅ Respuesta enviada exitosamente');
       
-      toast.success('¡Gracias por tu feedback!', {
-        description: 'Tu opinión nos ayuda a mejorar'
-      });
+      // HUF-04: Mostrar pop-up de éxito
+      setShowSuccessDialog(true);
       
-      console.log('🔄 Navegando a:', ROUTES.USER.THANK_YOU);
-      navigate(ROUTES.USER.THANK_YOU);
+      // Notificar al padre si está embebido
+      if (embedded && window.parent) {
+        window.parent.postMessage({ type: 'survey_completed', data: { surveyId: survey._id || survey.id } }, '*');
+      }
     } catch (error) {
       console.error('❌ Error al enviar respuesta:', error);
-      toast.error('Error al enviar la encuesta', {
-        description: error instanceof Error ? error.message : 'Por favor, intenta nuevamente.'
-      });
+      
+      // HUF-04: Mostrar pop-up de error
+      const errorMsg = error instanceof Error ? error.message : 'Error al enviar la encuesta. Por favor, intenta nuevamente.';
+      setErrorMessage(errorMsg);
+      setShowErrorDialog(true);
     } finally {
       setSubmitting(false);
     }
@@ -123,12 +144,39 @@ export function DynamicSurvey() {
     // HUF-01/02: Registrar "no respondió" al cerrar sin enviar
     if (survey && user && Object.keys(answers).length === 0) {
       try {
-        await responseService.registerNoResponse(survey._id || survey.id!, user.id);
+        await registerNoResponseMutation.mutateAsync({
+          surveyId: survey._id || survey.id!,
+          userId: user.id
+        });
+        console.log('📝 Registrado "no respondió" para usuario:', user.id);
       } catch (error) {
         console.error('Error al registrar no respuesta:', error);
       }
     }
+    
+    // Notificar al padre si está embebido
+    if (embedded && window.parent) {
+      window.parent.postMessage({ type: 'survey_closed' }, '*');
+    }
+    
     navigate(-1);
+  };
+
+  const handleSuccessClose = () => {
+    setShowSuccessDialog(false);
+    
+    // En modo embebido, solo cerrar el modal
+    if (embedded && window.parent) {
+      window.parent.postMessage({ type: 'survey_closed' }, '*');
+      return;
+    }
+    
+    // En modo normal, volver al home o cerrar
+    navigate(ROUTES.USER.HOME);
+  };
+
+  const handleErrorClose = () => {
+    setShowErrorDialog(false);
   };
 
   if (isLoading) {
@@ -158,9 +206,9 @@ export function DynamicSurvey() {
   return (
     <>
       {/* Welcome Dialog */}
-      <Dialog open={showDialog} onOpenChange={(open) => {
+      <Dialog open={showWelcomeDialog} onOpenChange={(open) => {
         if (!open) handleClose();
-        setShowDialog(open);
+        setShowWelcomeDialog(open);
       }}>
         <DialogContent className="sm:max-w-md">
           <button
@@ -173,7 +221,14 @@ export function DynamicSurvey() {
           <DialogHeader>
             <DialogTitle className="text-xl">{survey.nombreEncuesta}</DialogTitle>
             <DialogDescription className="pt-2">
-              Tu opinión es muy importante para nosotros. Esta encuesta te tomará aproximadamente 2 minutos.
+              {/* HUF-01/02: Mostrar contexto según el tipo de encuesta */}
+              {surveyType === 'postulacion' || surveyType === 'application' ? (
+                <>Tu opinión sobre el proceso de aplicación es muy importante para nosotros. Esta encuesta te tomará aproximadamente 2 minutos.</>
+              ) : surveyType === 'desercion' || surveyType === 'abandonment' ? (
+                <>Lamentamos que hayas decidido abandonar el proceso. Tu feedback nos ayudará a mejorar. Esta encuesta te tomará aproximadamente 2 minutos.</>
+              ) : (
+                <>Tu opinión es muy importante para nosotros. Esta encuesta te tomará aproximadamente 2 minutos.</>
+              )}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -191,7 +246,7 @@ export function DynamicSurvey() {
             </div>
           </div>
           <div className="flex gap-2">
-            <Button onClick={() => setShowDialog(false)} className="flex-1">
+            <Button onClick={() => setShowWelcomeDialog(false)} className="flex-1">
               Comenzar Encuesta
             </Button>
             <Button variant="outline" onClick={handleClose}>
@@ -201,8 +256,82 @@ export function DynamicSurvey() {
         </DialogContent>
       </Dialog>
 
-      <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-accent/10">
-        <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
+      {/* Success Dialog - HUF-04 */}
+      <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <div className="flex justify-center mb-4">
+              <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
+                <CheckCircle2 className="w-12 h-12 text-primary" />
+              </div>
+            </div>
+            <AlertDialogTitle className="text-center text-2xl font-bold">
+              ¡Encuesta completada!
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-center text-base pt-2 space-y-3">
+              <p className="text-foreground font-medium">
+                Gracias por compartir tu opinión con nosotros.
+              </p>
+              <p className="text-muted-foreground">
+                Tu feedback nos ayuda a mejorar nuestro proceso de selección y a brindar una mejor experiencia a todos nuestros candidatos.
+              </p>
+              <div className="pt-2">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/5 rounded-lg text-sm text-muted-foreground">
+                  <CheckCircle2 className="w-4 h-4 text-primary" />
+                  Tus respuestas han sido guardadas de forma segura
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-6">
+            <Button onClick={handleSuccessClose} className="w-full" size="lg">
+              {embedded ? 'Cerrar' : 'Volver al Inicio'}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Error Dialog - HUF-04 */}
+      <AlertDialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <div className="flex justify-center mb-4">
+              <div className="w-20 h-20 rounded-full bg-destructive/10 flex items-center justify-center">
+                <AlertCircle className="w-12 h-12 text-destructive" />
+              </div>
+            </div>
+            <AlertDialogTitle className="text-center text-2xl font-bold">
+              Error al enviar
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-center text-base pt-2 space-y-3">
+              <p className="text-foreground font-medium">
+                No se pudo completar el envío de la encuesta.
+              </p>
+              <p className="text-muted-foreground">
+                {errorMessage || 'Por favor, verifica tu conexión a internet e intenta nuevamente.'}
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex gap-2 mt-6">
+            <Button variant="outline" onClick={handleErrorClose} className="flex-1" size="lg">
+              Cancelar
+            </Button>
+            <Button onClick={handleSubmit} disabled={submitting} className="flex-1" size="lg">
+              {submitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Enviando...
+                </>
+              ) : (
+                'Reintentar'
+              )}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <div className="min-h-screen bg-background">
+        <header className="border-b bg-card sticky top-0 z-10">
           <div className="container mx-auto px-4 py-4">
             <Button variant="ghost" onClick={handleClose}>
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -210,24 +339,38 @@ export function DynamicSurvey() {
             </Button>
             <div className="mt-2">
               <h1 className="text-3xl font-bold text-primary">{survey.nombreEncuesta}</h1>
+              {/* HUF-01: Mostrar nombre de vacante en el encabezado */}
+              {jobTitle && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  <span className="font-semibold">Vacante:</span> {jobTitle}
+                </p>
+              )}
               {survey.empresaRelacionada && (
-                <p className="text-sm text-muted-foreground mt-1">Empresa: {survey.empresaRelacionada}</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  <span className="font-semibold">Empresa:</span> {survey.empresaRelacionada}
+                </p>
               )}
             </div>
           </div>
         </header>
 
         <main className="container mx-auto px-4 py-8 max-w-3xl">
-          {/* Progress Indicator */}
-          <Card className="p-4 mb-6">
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="font-medium">Progreso de la encuesta</span>
-                <span className="text-muted-foreground">
-                  {answeredQuestions} / {totalQuestions} preguntas respondidas
+          {/* Progress Indicator - HUF-03 */}
+          <Card className="p-6 mb-6">
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="font-semibold text-lg">Progreso de la encuesta</span>
+                <span className="text-2xl font-bold text-primary">
+                  {answeredQuestions} / {totalQuestions}
                 </span>
               </div>
-              <Progress value={progressPercentage} className="h-2" />
+              <Progress value={progressPercentage} className="h-3" />
+              <p className="text-sm text-muted-foreground text-center">
+                {progressPercentage === 100 
+                  ? '¡Excelente! Has completado todas las preguntas' 
+                  : `${answeredQuestions} de ${totalQuestions} preguntas respondidas (${Math.round(progressPercentage)}%)`
+                }
+              </p>
             </div>
           </Card>
 
