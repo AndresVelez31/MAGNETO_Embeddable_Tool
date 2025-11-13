@@ -14,8 +14,12 @@
     "seed:respuestas": "ts-node src/scripts/seeds/seedRespuestas.ts",
     "verify:encuestas": "ts-node src/scripts/verify/verificarEncuestas.ts",
     "verify:usuarios": "ts-node src/scripts/verify/verificarUsuarios.ts",
-    "verify:respuestas": "ts-node src/scripts/verify/verificarRespuestas.ts"
+    "verify:respuestas": "ts-node src/scripts/verify/verificarRespuestas.ts",
+    "process:ia": "ts-node src/scripts/procesarRespuestasIA.ts",
+    "check:metricas": "ts-node src/scripts/checkMetricas.ts"
   },
+  
+  
   "keywords": [],
   "author": "",
   "license": "ISC",

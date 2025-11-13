@@ -21,6 +21,9 @@ const updateStatus = controller.updateStatus.bind(controller);
 const deleteEncuesta = controller.delete.bind(controller);
 const getStatsByStatus = controller.getStatsByStatus.bind(controller);
 const getMetrics = controller.getMetrics.bind(controller);
+const getStoredMetrics = controller.getStoredMetrics.bind(controller);
+const getFakeMetrics = controller.getFakeMetrics ? controller.getFakeMetrics.bind(controller) : (() => { throw new Error('Not implemented'); });
+const getGeneratedMetrics = controller.getGeneratedMetrics ? controller.getGeneratedMetrics.bind(controller) : (() => { throw new Error('Not implemented'); });
 
 /**
  * @route   GET /api/encuestas
@@ -42,6 +45,9 @@ router.get('/stats/estado', getStatsByStatus);
  * @access  Public
  */
 router.get('/analytics/metricas', getMetrics);
+router.get('/analytics/metricas/almacenadas', getStoredMetrics);
+router.get('/analytics/metricas/fake', getFakeMetrics);
+router.get('/analytics/metricas/generadas', getGeneratedMetrics);
 
 /**
  * @route   GET /api/encuestas/tipo/:tipo/activa

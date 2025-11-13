@@ -89,6 +89,46 @@ Deberías ver un resumen de los datos insertados en cada colección.
 
 ---
 
+## 🔐 Variables de Entorno (HF API Key y otras)
+
+El servidor carga variables de entorno automáticamente gracias a `dotenv` (archivo `.env` dentro de la carpeta `servidor`). Para que la API Key de Hugging Face esté disponible para todos los usuarios del servidor, sigue estos pasos:
+
+1. Copia el ejemplo y crea tu `.env` en la carpeta `servidor`:
+```bash
+cd servidor
+cp .env.example .env
+```
+
+2. Abre `servidor/.env` y reemplaza `HF_API_KEY=hf_your_api_key_here` por tu clave real (NO la subas al repositorio):
+
+```text
+HF_API_KEY=hf_<tu_clave_aqui>
+```
+
+3. (Opcional) Para que la variable persista para todos los inicios de sesión del servidor en esa máquina, añade la línea a `~/.zshrc` (o al archivo de configuración de tu shell) en el servidor:
+
+```bash
+echo 'export HF_API_KEY="hf_<tu_clave_aqui>"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+4. Reinicia el servidor (o ejecuta en modo desarrollo):
+
+```bash
+cd servidor
+npm run dev
+```
+
+5. Verifica que la variable esté cargada en el proceso (desde la carpeta `servidor`):
+
+```bash
+node -e "console.log(process.env.HF_API_KEY ? 'KEY LOADED' : 'NO_KEY')"
+```
+
+Nota: `servidor/.env` está en `.gitignore` por seguridad. Nunca subas claves secretas a Git.
+
+---
+
 
 ## 🏃 Ejecutar el Proyecto
 
