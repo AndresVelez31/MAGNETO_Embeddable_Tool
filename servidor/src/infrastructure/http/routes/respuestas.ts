@@ -11,6 +11,7 @@ const router = Router();
 const controller = new RespuestaController();
 
 // Bind controller methods to preserve 'this' context
+const getAll = controller.getAll.bind(controller);
 const create = controller.create.bind(controller);
 const registerNoResponse = controller.registerNoResponse.bind(controller);
 const getByUser = controller.getByUser.bind(controller);
@@ -52,6 +53,13 @@ router.post('/no-respondio/:surveyId/:userId', registerNoResponse);
  * @access  Public
  */
 router.get('/:id', getById);
+
+/**
+ * @route   GET /api/respuestas
+ * @desc    Obtener todas las respuestas
+ * @access  Public
+ */
+router.get('/', getAll);
 
 /**
  * @route   POST /api/respuestas
