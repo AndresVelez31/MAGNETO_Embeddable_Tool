@@ -199,6 +199,38 @@ export class RespuestaController {
   }
 
   /**
+   * Obtener todas las respuestas
+   * GET /api/respuestas
+   */
+  async getAll(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const respuestas = await RespuestaModel.find()
+        .populate('idEncuesta', 'nombreEncuesta tipoEncuesta empresaRelacionada')
+        .sort({ creadaEn: -1 });
+
+      // Agregar estado dinámico
+      const respuestasConEstado = respuestas.map(r => {
+        const obj: any = r.toObject();
+        if (obj.respuestasItem.length === 0) {
+          obj.estado = 'no_respondida';
+        } else {
+          obj.estado = 'completada';
+        }
+        return obj;
+      });
+
+      res.json({
+        mensaje: 'Respuestas obtenidas exitosamente',
+        count: respuestas.length,
+        data: respuestasConEstado
+      });
+    } catch (error) {
+      console.error('❌ Error al obtener respuestas:', error);
+      next(error);
+    }
+  }
+
+  /**
    * Obtener una respuesta por ID
    * GET /api/respuestas/:id
    */

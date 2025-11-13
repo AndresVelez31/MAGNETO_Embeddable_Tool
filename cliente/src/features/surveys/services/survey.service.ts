@@ -15,12 +15,22 @@ import type {
 } from '../types/survey.types';
 
 /**
+ * Tipo para respuesta de API de encuestas
+ */
+interface SurveyApiResponse {
+  mensaje: string;
+  count: number;
+  data: Survey[];
+}
+
+/**
  * Repository Pattern - Abstrae el acceso a datos
  * Principio: Information Expert (GRASP)
  */
 class SurveyRepository {
   async findAll(): Promise<Survey[]> {
-    return httpClient.get<Survey[]>(API_ENDPOINTS.SURVEYS.BASE);
+    const response = await httpClient.get<SurveyApiResponse>(API_ENDPOINTS.SURVEYS.BASE);
+    return response.data;
   }
 
   async findById(id: string): Promise<Survey> {

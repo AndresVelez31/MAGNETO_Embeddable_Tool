@@ -31,7 +31,11 @@ export class EncuestaController {
   async getAll(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const encuestas = await this.encuestaService.getAllEncuestas();
-      res.json(encuestas);
+      res.json({
+        mensaje: 'Encuestas obtenidas exitosamente',
+        count: encuestas.length,
+        data: encuestas
+      });
     } catch (error) {
       next(error);
     }
@@ -64,13 +68,19 @@ export class EncuestaController {
       const { tipo } = req.params;
       
       // Mapear tipos del frontend al backend
+      // En la DB se usa: postulacion, abandono, satisfaccion
       const tipoMap: Record<string, string> = {
         'application': 'postulacion',
+        'postulacion': 'postulacion',
         'abandonment': 'abandono',
-        'custom': 'satisfaccion',
+        'abandono': 'abandono',
+        'desercion': 'abandono', // desercion -> abandono en DB
+        'satisfaction': 'satisfaccion',
+        'satisfaccion': 'satisfaccion',
+        'custom': 'custom',
       };
       
-      const tipoMapeado = tipoMap[tipo] || tipo;
+      const tipoMapeado = tipoMap[tipo.toLowerCase()] || tipo;
       
       const repository = new EncuestaRepository();
       const encuestas = await repository.findByType(tipoMapeado);
@@ -89,13 +99,19 @@ export class EncuestaController {
       const { tipo } = req.params;
       
       // Mapear tipos del frontend al backend
+      // En la DB se usa: postulacion, abandono, satisfaccion
       const tipoMap: Record<string, string> = {
         'application': 'postulacion',
+        'postulacion': 'postulacion',
         'abandonment': 'abandono',
-        'custom': 'satisfaccion',
+        'abandono': 'abandono',
+        'desercion': 'abandono', // desercion -> abandono en DB
+        'satisfaction': 'satisfaccion',
+        'satisfaccion': 'satisfaccion',
+        'custom': 'custom',
       };
       
-      const tipoMapeado = tipoMap[tipo] || tipo;
+      const tipoMapeado = tipoMap[tipo.toLowerCase()] || tipo;
       
       const encuesta = await this.encuestaService.getActiveEncuestaByType(tipoMapeado);
       res.json(encuesta);
@@ -260,7 +276,7 @@ export class EncuestaController {
       
       // Respuestas por tipo de encuesta (usando tipos de DB)
       const tiposDB = ['postulacion', 'abandono', 'satisfaccion'];
-      const tiposFrontend = ['application', 'abandonment', 'custom'];
+      const tiposFrontend = ['postulacion', 'desercion', 'satisfaccion'];
       
       const dataPorTipo = await Promise.all(tiposDB.map(async (tipoDB, index) => {
         const encuestasTipo = await EncuestaModel.find({ tipoEncuesta: tipoDB }, '_id preguntas');

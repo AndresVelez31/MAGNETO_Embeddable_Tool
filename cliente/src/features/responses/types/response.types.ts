@@ -33,3 +33,10 @@ export interface CreateResponseDTO {
 export interface ResponseFormData {
   [questionId: string]: string | number | string[];
 }
+
+// Tipo para la respuesta del API
+export interface ResponseApiResponse {
+  mensaje: string;
+  count: number;
+  data: Response[];
+}

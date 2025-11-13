@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { Button } from '@/shared/components/ui/button';
 import { Card } from '@/shared/components/ui/card';
-import { ClipboardList, BarChart3, LogOut } from 'lucide-react';
+import { ClipboardList, BarChart3, LogOut, MessageSquare } from 'lucide-react';
 import { ROUTES } from '@/core/config/routes.config';
 
 function AdminHomePage() {
@@ -41,7 +41,7 @@ function AdminHomePage() {
             ¿Qué deseas hacer hoy?
           </h2>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-3 gap-8">
             <Card
               className="p-8 cursor-pointer transition-all hover:shadow-xl hover:-translate-y-1 border-2 hover:border-primary"
               onClick={() => navigate(ROUTES.ADMIN.SURVEYS.LIST)}
@@ -50,9 +50,24 @@ function AdminHomePage() {
                 <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
                   <ClipboardList className="w-10 h-10 text-primary" />
                 </div>
-                <h3 className="text-2xl font-semibold">Gestión de Encuestas</h3>
+                <h3 className="text-2xl font-semibold">Encuestas</h3>
                 <p className="text-muted-foreground">
                   Crea, edita y administra encuestas para tus candidatos
+                </p>
+              </div>
+            </Card>
+
+            <Card
+              className="p-8 cursor-pointer transition-all hover:shadow-xl hover:-translate-y-1 border-2 hover:border-green-500"
+              onClick={() => navigate(ROUTES.ADMIN.RESPONSES.LIST)}
+            >
+              <div className="flex flex-col items-center text-center space-y-4">
+                <div className="w-20 h-20 rounded-full bg-green-500/10 flex items-center justify-center">
+                  <MessageSquare className="w-10 h-10 text-green-500" />
+                </div>
+                <h3 className="text-2xl font-semibold">Respuestas</h3>
+                <p className="text-muted-foreground">
+                  Visualiza y filtra las respuestas enviadas
                 </p>
               </div>
             </Card>
@@ -65,7 +80,7 @@ function AdminHomePage() {
                 <div className="w-20 h-20 rounded-full bg-accent/10 flex items-center justify-center">
                   <BarChart3 className="w-10 h-10 text-accent" />
                 </div>
-                <h3 className="text-2xl font-semibold">Visualización de Métricas</h3>
+                <h3 className="text-2xl font-semibold">Métricas</h3>
                 <p className="text-muted-foreground">
                   Revisa estadísticas y resultados de las encuestas
                 </p>
