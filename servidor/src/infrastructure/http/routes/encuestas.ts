@@ -21,6 +21,7 @@ const updateStatus = controller.updateStatus.bind(controller);
 const deleteEncuesta = controller.delete.bind(controller);
 const getStatsByStatus = controller.getStatsByStatus.bind(controller);
 const getMetrics = controller.getMetrics.bind(controller);
+const exportMetrics = controller.exportMetrics.bind(controller);
 
 /**
  * @route   GET /api/encuestas
@@ -42,6 +43,13 @@ router.get('/stats/estado', getStatsByStatus);
  * @access  Public
  */
 router.get('/analytics/metricas', getMetrics);
+
+/**
+ * @route   POST /api/encuestas/analytics/metricas/export
+ * @desc    Exportar métricas en formato CSV, PDF o JSON
+ * @access  Public
+ */
+router.post('/analytics/metricas/export', exportMetrics);
 
 /**
  * @route   GET /api/encuestas/tipo/:tipo/activa

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMetrics } from '@/features/analytics/hooks/useMetrics';
+import { useExportMetrics } from '@/features/analytics/hooks/useExportMetrics';
 import { Button } from '@/shared/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import {
@@ -10,13 +11,47 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/shared/components/ui/select';
-import { ArrowLeft, Users, TrendingUp, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
+import { Input } from '@/shared/components/ui/input';
+import { Label } from '@/shared/components/ui/label';
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/shared/components/ui/dialog';
+import { ArrowLeft, Users, TrendingUp, CheckCircle2, XCircle, Loader2, Download, FileText, FileJson, FileSpreadsheet } from 'lucide-react';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 export function Metrics() {
   const navigate = useNavigate();
   const [timeRange, setTimeRange] = useState(30);
   const { data: metrics, isLoading, error, refetch } = useMetrics(timeRange);
+  
+  // Export functionality
+  const { exportMetrics, isExporting } = useExportMetrics();
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [exportFormat, setExportFormat] = useState<'csv' | 'pdf' | 'json'>('json');
+  const [empresa, setEmpresa] = useState('');
+  const [area, setArea] = useState('');
+
+  const handleExport = async () => {
+    const result = await exportMetrics({
+      formato: exportFormat,
+      dias: timeRange,
+      empresa: empresa || undefined,
+      area: area || undefined,
+    });
+
+    if (result) {
+      setExportDialogOpen(false);
+      // Resetear filtros opcionales
+      setEmpresa('');
+      setArea('');
+    }
+  };
 
   if (isLoading) {
     return (
@@ -109,6 +144,119 @@ export function Metrics() {
               <SelectItem value="90">Últimos 90 días</SelectItem>
             </SelectContent>
           </Select>
+          
+          {/* Botón de Exportación */}
+          <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                <Download className="h-4 w-4" />
+                Exportar Métricas
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle>Exportar Métricas</DialogTitle>
+                <DialogDescription>
+                  Selecciona el formato de exportación y aplica filtros opcionales
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="grid gap-4 py-4">
+                {/* Selector de Formato */}
+                <div className="grid gap-2">
+                  <Label htmlFor="formato">Formato de archivo</Label>
+                  <Select value={exportFormat} onValueChange={(value: any) => setExportFormat(value)}>
+                    <SelectTrigger id="formato">
+                      <SelectValue placeholder="Seleccionar formato" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="json">
+                        <div className="flex items-center gap-2">
+                          <FileJson className="h-4 w-4" />
+                          <span>JSON - Datos estructurados</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="csv">
+                        <div className="flex items-center gap-2">
+                          <FileSpreadsheet className="h-4 w-4" />
+                          <span>CSV - Hoja de cálculo</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="pdf">
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-4 w-4" />
+                          <span>PDF - Documento</span>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Filtro por Empresa (Opcional) */}
+                <div className="grid gap-2">
+                  <Label htmlFor="empresa">Empresa (opcional)</Label>
+                  <Input
+                    id="empresa"
+                    placeholder="Ej: Magneto365"
+                    value={empresa}
+                    onChange={(e) => setEmpresa(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Deja vacío para incluir todas las empresas
+                  </p>
+                </div>
+
+                {/* Filtro por Área (Opcional) */}
+                <div className="grid gap-2">
+                  <Label htmlFor="area">Área (opcional)</Label>
+                  <Input
+                    id="area"
+                    placeholder="Ej: Recursos Humanos"
+                    value={area}
+                    onChange={(e) => setArea(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Deja vacío para incluir todas las áreas
+                  </p>
+                </div>
+
+                {/* Información del período */}
+                <div className="rounded-lg bg-muted p-3">
+                  <p className="text-sm font-medium">Período seleccionado</p>
+                  <p className="text-sm text-muted-foreground">
+                    Últimos {timeRange} días
+                  </p>
+                </div>
+              </div>
+
+              <DialogFooter>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setExportDialogOpen(false)}
+                  disabled={isExporting}
+                >
+                  Cancelar
+                </Button>
+                <Button 
+                  onClick={handleExport}
+                  disabled={isExporting}
+                  className="gap-2"
+                >
+                  {isExporting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Exportando...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="h-4 w-4" />
+                      Exportar
+                    </>
+                  )}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
 
         {/* KPI Cards */}
