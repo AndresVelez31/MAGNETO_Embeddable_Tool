@@ -324,23 +324,40 @@ export class EncuestaController {
         };
       }));
       
-      // Distribución de estados de respuestas
+      // Distribución de estados de respuestas - basada en dataPorTipo
+      const completadasTotal = dataPorTipo.reduce((sum, item) => sum + item.completadas, 0);
+      const parcialesTotal = dataPorTipo.reduce((sum, item) => sum + item.parciales, 0);
+      const abandonadasTotal = dataPorTipo.reduce((sum, item) => sum + item.abandonadas, 0);
+      
       const distribucionRespuestas = {
-        completadas: respuestasCompletas,
-        parciales: totalRespuestas - respuestasCompletas - respuestasAbandonadas,
-        abandonadas: respuestasAbandonadas
+        completadas: completadasTotal,
+        parciales: parcialesTotal,
+        abandonadas: abandonadasTotal
       };
       
-      // Clasificación de satisfacción (ejemplo simple)
-      const satisfaccionBuena = Math.floor(respuestasCompletas * 0.6);
-      const satisfaccionRegular = Math.floor(respuestasCompletas * 0.3);
-      const satisfaccionMala = respuestasCompletas - satisfaccionBuena - satisfaccionRegular;
+      // Calcular satisfacción basada en respuestas reales
+      const distribucionSatisfaccion = await this.calcularDistribucionSatisfaccion(
+        fechaLimite,
+        undefined
+      );
       
-      const distribucionSatisfaccion = {
-        buena: satisfaccionBuena,
-        regular: satisfaccionRegular,
-        mala: satisfaccionMala
-      };
+      // Calcular tiempo promedio de completado
+      const tiempoPromedio = await this.calcularTiempoPromedio(
+        fechaLimite,
+        undefined
+      );
+      
+      // Calcular tasa de respuesta real
+      const tasaRespuesta = await this.calcularTasaRespuesta(
+        fechaLimite,
+        undefined
+      );
+      
+      // Calcular satisfacción general (promedio de escala)
+      const satisfaccionGeneral = await this.calcularSatisfaccionGeneral(
+        fechaLimite,
+        undefined
+      );
       
       res.json({
         periodo: {
@@ -354,7 +371,10 @@ export class EncuestaController {
           respuestasAbandonadas,
           tasaCompletado,
           tasaAbandono,
-          encuestasActivas
+          encuestasActivas,
+          tiempoPromedio,
+          tasaRespuesta,
+          satisfaccionGeneral
         },
         respuestasPorTipo: dataPorTipo,
         distribucionRespuestas,
@@ -508,23 +528,22 @@ export class EncuestaController {
         };
       }));
 
-      // Distribución de respuestas
+      // Distribución de respuestas - basada en dataPorTipo
+      const completadasTotal = dataPorTipo.reduce((sum, item) => sum + item.completadas, 0);
+      const parcialesTotal = dataPorTipo.reduce((sum, item) => sum + item.parciales, 0);
+      const abandonadasTotal = dataPorTipo.reduce((sum, item) => sum + item.abandonadas, 0);
+      
       const distribucionRespuestas = {
-        completadas: respuestasCompletas,
-        parciales: totalRespuestas - respuestasCompletas - respuestasAbandonadas,
-        abandonadas: respuestasAbandonadas
+        completadas: completadasTotal,
+        parciales: parcialesTotal,
+        abandonadas: abandonadasTotal
       };
       
-      // Distribución de satisfacción
-      const satisfaccionBuena = Math.floor(respuestasCompletas * 0.6);
-      const satisfaccionRegular = Math.floor(respuestasCompletas * 0.3);
-      const satisfaccionMala = respuestasCompletas - satisfaccionBuena - satisfaccionRegular;
-      
-      const distribucionSatisfaccion = {
-        buena: satisfaccionBuena,
-        regular: satisfaccionRegular,
-        mala: satisfaccionMala
-      };
+      // Distribución de satisfacción basada en respuestas reales
+      const distribucionSatisfaccion = await this.calcularDistribucionSatisfaccion(
+        fechaLimite,
+        empresa
+      );
 
       // Preparar datos para exportación
       const exportData: MetricsExportData = {
@@ -596,6 +615,236 @@ export class EncuestaController {
     } catch (error) {
       console.error('Error al exportar métricas:', error);
       next(error);
+    }
+  }
+
+  /**
+   * Calcula la distribución de satisfacción basada en respuestas reales
+   * Analiza preguntas de tipo "escala" para clasificar como buena/regular/mala
+   */
+  private async calcularDistribucionSatisfaccion(fechaLimite: Date, empresa?: string) {
+    try {
+      // Obtener todas las encuestas de tipo "satisfaccion"
+      const filtro: any = { tipoEncuesta: 'satisfaccion' };
+      if (empresa) {
+        filtro.empresaRelacionada = empresa;
+      }
+      
+      const encuestasSatisfaccion = await EncuestaModel.find(filtro, '_id preguntas');
+      
+      if (encuestasSatisfaccion.length === 0) {
+        return { buena: 0, regular: 0, mala: 0 };
+      }
+
+      let satisfaccionBuena = 0;
+      let satisfaccionRegular = 0;
+      let satisfaccionMala = 0;
+      let totalRespuestasConSatisfaccion = 0;
+
+      // Para cada encuesta de satisfacción
+      for (const encuesta of encuestasSatisfaccion) {
+        // Obtener preguntas de escala
+        const preguntasEscala = encuesta.preguntas?.filter((p: any) => p.tipoPregunta === 'escala') || [];
+        
+        if (preguntasEscala.length === 0) continue;
+
+        // Obtener respuestas a esta encuesta
+        const respuestas = await RespuestaModel.find({
+          idEncuesta: encuesta._id,
+          creadaEn: { $gte: fechaLimite },
+          respuestasItem: { $exists: true, $ne: [] }
+        });
+
+        for (const respuesta of respuestas) {
+          // Para cada pregunta de escala, obtener la puntuación
+          for (const pregunta of preguntasEscala) {
+            const itemRespuesta = respuesta.respuestasItem?.find(
+              (item: any) => {
+                const itemId = item.idPregunta?.toString?.() || item.idPregunta;
+                const preguntaId = pregunta.idPregunta?.toString?.() || pregunta.idPregunta;
+                return itemId === preguntaId;
+              }
+            );
+
+            if (itemRespuesta) {
+              const valorRespuesta = parseInt(String(itemRespuesta.respuesta)) || 0;
+              
+              // Clasificar según escala (1-5)
+              if (valorRespuesta >= 4) {
+                satisfaccionBuena++;
+              } else if (valorRespuesta === 3) {
+                satisfaccionRegular++;
+              } else if (valorRespuesta <= 2) {
+                satisfaccionMala++;
+              }
+              
+              totalRespuestasConSatisfaccion++;
+            }
+          }
+        }
+      }
+
+      // Si no hay respuestas con satisfacción registrada, retornar ceros
+      if (totalRespuestasConSatisfaccion === 0) {
+        return { buena: 0, regular: 0, mala: 0 };
+      }
+
+      return {
+        buena: satisfaccionBuena,
+        regular: satisfaccionRegular,
+        mala: satisfaccionMala
+      };
+    } catch (error) {
+      console.error('Error calculando distribución de satisfacción:', error);
+      return { buena: 0, regular: 0, mala: 0 };
+    }
+  }
+
+  /**
+   * Calcula el tiempo promedio de completado en minutos
+   */
+  private async calcularTiempoPromedio(fechaLimite: Date, empresa?: string): Promise<number> {
+    try {
+      const pipeline: any[] = [
+        {
+          $match: {
+            creadaEn: { $gte: fechaLimite },
+            respuestasItem: { $exists: true, $ne: [] }
+          }
+        }
+      ];
+
+      // Si hay empresa, filtrar por encuestas relacionadas
+      if (empresa) {
+        const encuestasEmpresa = await EncuestaModel.find(
+          { empresaRelacionada: empresa },
+          '_id'
+        );
+        const idsEncuestas = encuestasEmpresa.map(e => e._id);
+        pipeline.push({
+          $match: { idEncuesta: { $in: idsEncuestas } }
+        });
+      }
+
+      pipeline.push({
+        $group: {
+          _id: null,
+          tiempoPromedio: {
+            $avg: {
+              $divide: [
+                { $subtract: ['$actualizadaEn', '$creadaEn'] },
+                60000 // Convertir ms a minutos
+              ]
+            }
+          }
+        }
+      });
+
+      const resultado = await RespuestaModel.aggregate(pipeline);
+      
+      if (resultado.length === 0) return 0;
+      
+      const tiempoPromedio = resultado[0].tiempoPromedio || 0;
+      return Math.round(tiempoPromedio * 10) / 10; // Redondear a 1 decimal
+    } catch (error) {
+      console.error('Error calculando tiempo promedio:', error);
+      return 0;
+    }
+  }
+
+  /**
+   * Calcula la tasa de respuesta real (usuarios únicos que respondieron / total de respuestas)
+   */
+  private async calcularTasaRespuesta(fechaLimite: Date, empresa?: string): Promise<number> {
+    try {
+      const filtro: any = { creadaEn: { $gte: fechaLimite } };
+
+      if (empresa) {
+        const encuestasEmpresa = await EncuestaModel.find(
+          { empresaRelacionada: empresa },
+          '_id'
+        );
+        const idsEncuestas = encuestasEmpresa.map(e => e._id);
+        filtro.idEncuesta = { $in: idsEncuestas };
+      }
+
+      // Usuarios únicos que respondieron
+      const usuariosUnicos = await RespuestaModel.distinct('idUsuario', filtro);
+      const totalUsuariosUnicos = usuariosUnicos.length;
+
+      // Total de respuestas (tanto completas como abandonadas)
+      const totalRespuestas = await RespuestaModel.countDocuments(filtro);
+
+      if (totalRespuestas === 0) return 0;
+
+      // Tasa de respuesta: usuarios que respondieron / total de respuestas
+      const tasaRespuesta = (totalUsuariosUnicos / totalRespuestas) * 100;
+      return Math.round(tasaRespuesta * 10) / 10; // Redondear a 1 decimal
+    } catch (error) {
+      console.error('Error calculando tasa de respuesta:', error);
+      return 0;
+    }
+  }
+
+  /**
+   * Calcula el promedio de satisfacción general en escala 1-5
+   */
+  private async calcularSatisfaccionGeneral(fechaLimite: Date, empresa?: string): Promise<number> {
+    try {
+      // Obtener encuestas de satisfacción
+      const filtro: any = { tipoEncuesta: 'satisfaccion' };
+      if (empresa) {
+        filtro.empresaRelacionada = empresa;
+      }
+
+      const encuestasSatisfaccion = await EncuestaModel.find(filtro, '_id preguntas');
+
+      if (encuestasSatisfaccion.length === 0) return 0;
+
+      let sumaCalificaciones = 0;
+      let totalCalificaciones = 0;
+
+      for (const encuesta of encuestasSatisfaccion) {
+        // Obtener preguntas de escala
+        const preguntasEscala = encuesta.preguntas?.filter((p: any) => p.tipoPregunta === 'escala') || [];
+
+        if (preguntasEscala.length === 0) continue;
+
+        // Obtener respuestas completadas
+        const respuestas = await RespuestaModel.find({
+          idEncuesta: encuesta._id,
+          creadaEn: { $gte: fechaLimite },
+          respuestasItem: { $exists: true, $ne: [] }
+        });
+
+        for (const respuesta of respuestas) {
+          for (const pregunta of preguntasEscala) {
+            const itemRespuesta = respuesta.respuestasItem?.find(
+              (item: any) => {
+                const itemId = item.idPregunta?.toString?.() || item.idPregunta;
+                const preguntaId = pregunta.idPregunta?.toString?.() || pregunta.idPregunta;
+                return itemId === preguntaId;
+              }
+            );
+
+            if (itemRespuesta) {
+              const valor = parseInt(String(itemRespuesta.respuesta)) || 0;
+              if (valor > 0) {
+                sumaCalificaciones += valor;
+                totalCalificaciones++;
+              }
+            }
+          }
+        }
+      }
+
+      if (totalCalificaciones === 0) return 0;
+
+      const promedio = sumaCalificaciones / totalCalificaciones;
+      return Math.round(promedio * 10) / 10; // Redondear a 1 decimal
+    } catch (error) {
+      console.error('Error calculando satisfacción general:', error);
+      return 0;
     }
   }
 }

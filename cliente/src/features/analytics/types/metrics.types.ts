@@ -22,6 +22,9 @@ export interface MetricsSummary {
   tasaCompletado: number;
   tasaAbandono: number;
   encuestasActivas: number;
+  tiempoPromedio?: number;
+  tasaRespuesta?: number;
+  satisfaccionGeneral?: number;
 }
 
 export interface ResponsesByType {

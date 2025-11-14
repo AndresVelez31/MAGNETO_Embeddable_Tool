@@ -73,9 +73,9 @@
       const typeMap = {
         'application': 'postulacion',
         'postulacion': 'postulacion',
-        'abandonment': 'desercion',
-        'desercion': 'desercion',
-        'abandono': 'desercion',
+        'abandonment': 'abandono',
+        'desercion': 'abandono',
+        'abandono': 'abandono',
         'satisfaction': 'satisfaccion',
         'satisfaccion': 'satisfaccion',
         'custom': 'custom'

@@ -95,7 +95,7 @@ export function Metrics() {
 
   // Preparar datos para los gráficos con validación
   const responseData = metrics.respuestasPorTipo?.map((tipo: any) => ({
-    name: tipo.tipo === 'application' ? 'Aplicación' : tipo.tipo === 'abandonment' ? 'Abandono' : 'Personalizada',
+    name: tipo.tipo === 'postulacion' ? 'Postulación' : tipo.tipo === 'desercion' ? 'Deserción' : 'Personalizada',
     responses: tipo.completadas + tipo.parciales + tipo.abandonadas,
     completed: tipo.completadas,
     partial: tipo.parciales,
@@ -432,21 +432,21 @@ export function Metrics() {
                 <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/20">
                   <div>
                     <p className="text-sm font-medium">Promedio de completado</p>
-                    <p className="text-2xl font-bold text-primary">1.8 min</p>
+                    <p className="text-2xl font-bold text-primary">{metrics.resumen?.tiempoPromedio || 0} min</p>
                   </div>
                   <TrendingUp className="h-8 w-8 text-primary" />
                 </div>
                 <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/20">
                   <div>
                     <p className="text-sm font-medium">Tasa de respuesta</p>
-                    <p className="text-2xl font-bold text-primary">89.3%</p>
+                    <p className="text-2xl font-bold text-primary">{(metrics.resumen?.tasaRespuesta || 0).toFixed(1)}%</p>
                   </div>
                   <CheckCircle2 className="h-8 w-8 text-primary" />
                 </div>
                 <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/20">
                   <div>
                     <p className="text-sm font-medium">Satisfacción general</p>
-                    <p className="text-2xl font-bold text-green-600">4.2/5</p>
+                    <p className="text-2xl font-bold text-green-600">{(metrics.resumen?.satisfaccionGeneral || 0).toFixed(1)}/5</p>
                   </div>
                   <Users className="h-8 w-8 text-green-600" />
                 </div>
