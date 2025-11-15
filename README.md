@@ -1,6 +1,8 @@
+<div align="center">
+
 # 🧲 MAGNETO Embeddable Tool
 
-<div align="center">
+
 
 ![MAGNETO](https://img.shields.io/badge/MAGNETO-Survey%20Platform-blue?style=for-the-badge)
 ![Version](https://img.shields.io/badge/version-1.0.0-green?style=for-the-badge)
