@@ -150,30 +150,19 @@
     </div>
 
     <div class="content">
-      <h2>🎯 Modos de Activación</h2>
+      <h2>🎯 Integración Simple</h2>
+      <p>Magneto te permite capturar feedback de candidatos en diferentes momentos del proceso de reclutamiento:</p>
       <div class="feature-grid">
         <div class="feature-card">
-          <h3>Button (Botón Flotante)</h3>
-          <p>Muestra un botón flotante que el usuario puede hacer clic cuando quiera.</p>
-          <code>trigger: 'button'</code>
+          <h3>📋 Encuesta de Postulación</h3>
+          <p>Captura la experiencia del candidato inmediatamente después de aplicar a una vacante.</p>
+          <p><strong>Casos de uso:</strong> Evaluar el proceso de aplicación, formularios, facilidad de uso.</p>
         </div>
 
         <div class="feature-card">
-          <h3>Auto (Automático)</h3>
-          <p>Abre la encuesta automáticamente después de un delay configurable.</p>
-          <code>trigger: 'auto', delay: 3000</code>
-        </div>
-
-        <div class="feature-card">
-          <h3>Scroll (Por Desplazamiento)</h3>
-          <p>Se activa cuando el usuario llega al 75% del scroll de la página.</p>
-          <code>trigger: 'scroll'</code>
-        </div>
-
-        <div class="feature-card">
-          <h3>Exit (Intento de Salida)</h3>
-          <p>Muestra la encuesta cuando el usuario intenta abandonar la página.</p>
-          <code>trigger: 'exit'</code>
+          <h3>🚪 Encuesta de Deserción</h3>
+          <p>Entiende por qué los candidatos abandonan el proceso de selección.</p>
+          <p><strong>Casos de uso:</strong> Identificar fricción, mejorar retención, optimizar el funnel.</p>
         </div>
       </div>
     </div>
@@ -238,14 +227,6 @@
         <button class="demo-button" onclick="demoDesercion()">
           ❌ Demo Deserción
         </button>
-        
-        <button class="demo-button" onclick="demoAuto()">
-          ⏱️ Demo Auto (3s)
-        </button>
-        
-        <button class="demo-button" onclick="demoScroll()">
-          � Demo Scroll
-        </button>
       </div>
     </div>
 
@@ -307,7 +288,7 @@
     function demoDesercion() {
       resetDemo();
       window.MagnetoSurvey.init({
-        surveyType: 'desercion',
+        surveyType: 'abandono',
         trigger: 'button',
         buttonText: '❌ Feedback Deserción',
         position: 'bottom-left',
@@ -320,35 +301,6 @@
         }
       });
       currentDemo = 'desercion';
-    }
-
-    function demoAuto() {
-      resetDemo();
-      alert('La encuesta se abrirá automáticamente en 3 segundos');
-      window.MagnetoSurvey.init({
-        surveyType: 'postulacion',
-        trigger: 'auto',
-        delay: 3000,
-        jobTitle: 'Product Manager',
-        onComplete: function() {
-          alert('¡Gracias por completar la encuesta!');
-        }
-      });
-      currentDemo = 'auto';
-    }
-
-    function demoScroll() {
-      resetDemo();
-      alert('Desplázate hasta el final de la página para activar la encuesta');
-      window.MagnetoSurvey.init({
-        surveyType: 'satisfaccion',
-        trigger: 'scroll',
-        jobTitle: 'Analista de Datos',
-        onComplete: function() {
-          alert('¡Gracias por tu feedback!');
-        }
-      });
-      currentDemo = 'scroll';
     }
 
     // Inicializar demo por defecto
