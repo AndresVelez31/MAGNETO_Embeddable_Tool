@@ -80,12 +80,12 @@
 ├───────────────────────────────────────────────────────────────────────┤
 │                                                                        │
 │  COMPONENTS/UI         COMPONENTS/COMMON       COMPONENTS/LAYOUT      │
-│  ┌──────────────┐     ┌──────────────┐       ┌──────────────┐        │
+│  ┌──────────────┌     ┌──────────────┌       ┌──────────────┌        │
 │  │ Button       │     │ Loading      │       │ Header       │        │
 │  │ Card         │     │ Error        │       │ Footer       │        │
 │  │ Input        │     │ AuthGuard    │       │ Container    │        │
-│  │ Dialog       │     └──────────────┘       └──────────────┘        │
-│  │ ...shadcn/ui │                                                     │
+│  │ Dialog       │     │ SurveyModal  │       └──────────────┘        │
+│  │ ...shadcn/ui │     └──────────────┘                                    │
 │  └──────────────┘                                                     │
 │                                                                        │
 │  HOOKS              TYPES                  UTILS                      │
@@ -174,12 +174,11 @@
 │  └────────────────────────────────────────────────────────┘           │
 │                          ↓ usa                                         │
 │  MODELS (Mongoose Schemas)                                             │
-│  ┌────────────────────────────────────────────────────────┐           │
+│  ┌────────────────────────────────────────────────────────────┌           │
 │  │ EncuestaModel (Schema + Model de Mongoose)             │           │
 │  │ RespuestaModel                                          │           │
 │  │ UsuarioModel                                            │           │
-│  │ MetricaModel                                            │           │
-│  └────────────────────────────────────────────────────────┘           │
+│  └────────────────────────────────────────────────────────────┘           │
 └───────────────────────────────────────────────────────────────────────┘
                                     ↓
                             ┌──────────────┐
@@ -406,17 +405,18 @@ FEATURES (Independientes y Autocontenidos)
 │ FEATURE: Responses (User)                                 │
 ├──────────────────────────────────────────────────────────┤
 │ • components/    QuestionDisplay, QuestionInput           │
-│ • hooks/         useResponseForm                          │
+│ • hooks/         useResponses                          │
 │ • services/      responseService                          │
 │ • types/         Response, ResponseItem                   │
-│ • pages/         DynamicSurveyPage, ThankYouPage          │
+│ • pages/         DynamicSurveyPage, ResponseListPage,     │
+│                 ResponseDetailPage                           │
 └──────────────────────────────────────────────────────────┘
 
 ┌──────────────────────────────────────────────────────────┐
 │ FEATURE: Analytics (Admin)                                │
 ├──────────────────────────────────────────────────────────┤
 │ • components/    MetricsCard, ResponseChart               │
-│ • hooks/         useMetrics                               │
+│ • hooks/         useMetrics, useExportMetrics             │
 │ • services/      analyticsService                         │
 │ • types/         MetricsData, MetricsSummary              │
 │ • pages/         MetricsPage                              │

@@ -34,3 +34,11 @@ ehthumbs.db
 **/.cache/
 *.tmp
 *.temp
+
+# Documentación de desarrollo (no subir al repo)
+CLEAN_CODE.md
+PRINCIPIOS_SOLID.md
+PRINCIPIOS_GRASP.md
+PATRON_*.md
+DIAGRAMA_CLASES.md
+DIAGRAMA_CLASES_IMPLEMENTACION.md

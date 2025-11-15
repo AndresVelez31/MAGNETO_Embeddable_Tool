@@ -81,18 +81,20 @@ cliente/
 │   │   │
 │   │   ├── responses/          # Responder encuestas (USER)
 │   │   │   ├── hooks/
-│   │   │   │   └── useResponse.ts
+│   │   │   │   └── useResponses.ts
 │   │   │   ├── services/
 │   │   │   │   └── response.service.ts
 │   │   │   ├── types/
 │   │   │   │   └── response.types.ts
 │   │   │   └── pages/
 │   │   │       ├── DynamicSurveyPage.tsx
-│   │   │       └── ThankYouPage.tsx
+│   │   │       ├── ResponseListPage.tsx
+│   │   │       └── ResponseDetailPage.tsx
 │   │   │
 │   │   ├── analytics/          # Métricas y análisis
 │   │   │   ├── hooks/
-│   │   │   │   └── useMetrics.ts
+│   │   │   │   ├── useMetrics.ts
+│   │   │   │   └── useExportMetrics.ts
 │   │   │   ├── services/
 │   │   │   │   └── analytics.service.ts
 │   │   │   ├── types/
@@ -126,7 +128,8 @@ cliente/
 │   │   │   └── common/
 │   │   │       ├── AuthGuard.tsx
 │   │   │       ├── QuestionDisplay.tsx
-│   │   │       └── QuestionInput.tsx
+│   │   │       ├── QuestionInput.tsx
+│   │   │       └── SurveyModal.tsx
 │   │   │
 │   │   ├── hooks/              # Hooks compartidos
 │   │   │   └── use-toast.ts
@@ -137,9 +140,9 @@ cliente/
 │   ├── types/                  # Types globales
 │   │   └── styles.d.ts
 │   │
-│   ├── App.tsx                 # Componente raíz simplificado
-│   ├── main.tsx                # Entry point
-│   └── index.css               # Estilos globales
+│   ├── App.tsx                 # Componente raíz con providers
+│   ├── index.tsx               # Entry point (ReactDOM.render)
+│   └── index.css               # Estilos globales + Tailwind
 │
 ├── index.html
 ├── package.json
@@ -160,35 +163,24 @@ servidor/
 │   │
 │   ├── domain/                 # Capa de dominio (lógica de negocio)
 │   │   ├── entities/           # Entidades de dominio
-│   │   │   ├── Encuesta.entity.ts
-│   │   │   ├── Respuesta.entity.ts
-│   │   │   ├── Usuario.entity.ts
-│   │   │   └── Metrica.entity.ts
+│   │   │   └── Encuesta.entity.ts
 │   │   │
 │   │   ├── interfaces/         # Interfaces de repositorios
-│   │   │   ├── IEncuestaRepository.ts
-│   │   │   ├── IRespuestaRepository.ts
-│   │   │   ├── IUsuarioRepository.ts
-│   │   │   └── IMetricaRepository.ts
+│   │   │   └── IEncuestaRepository.ts
 │   │   │
 │   │   └── services/           # Lógica de negocio
 │   │       ├── EncuestaService.ts
-│   │       ├── RespuestaService.ts
-│   │       └── MetricaService.ts
+│   │       └── ExportService.ts
 │   │
 │   ├── infrastructure/         # Capa de infraestructura
 │   │   ├── database/           # Implementaciones de base de datos
 │   │   │   ├── models/         # Modelos Mongoose
 │   │   │   │   ├── Encuesta.ts
 │   │   │   │   ├── Respuesta.ts
-│   │   │   │   ├── Usuario.ts
-│   │   │   │   └── Metrica.ts
+│   │   │   │   └── Usuario.ts
 │   │   │   │
 │   │   │   └── repositories/   # Implementación de repositorios
-│   │   │       ├── EncuestaRepository.ts
-│   │   │       ├── RespuestaRepository.ts
-│   │   │       ├── UsuarioRepository.ts
-│   │   │       └── MetricaRepository.ts
+│   │   │       └── EncuestaRepository.ts
 │   │   │
 │   │   └── http/               # Capa HTTP
 │   │       ├── controllers/    # Controladores
