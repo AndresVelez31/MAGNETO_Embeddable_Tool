@@ -509,12 +509,12 @@ npm run lint             # Ejecutar ESLint
 
 **Universidad EAFIT** - Ingeniería de Software (4to Semestre)  
 **Proyecto**: Sistema de Encuestas Embebibles de Magneto SNAS  
-**Año**: 2024-2025
+**Año**: 2025
 
 
 ---
 
 <div align="center">
   <p>Hecho con ❤️ por el equipo SNAS</p>
-  <p>Universidad EAFIT - 2024-2025</p>
+  <p>Universidad EAFIT - 2025</p>
 </div>
