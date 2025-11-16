@@ -484,6 +484,3 @@ FEATURES (Independientes y Autocontenidos)
 └───────────────────────────────────────────────────────────────┘
 ```
 
----
-
-Este diagrama visual te ayudará a entender mejor cómo se organizan y relacionan todos los componentes de la nueva arquitectura. 🎨
